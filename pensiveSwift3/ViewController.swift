@@ -9,8 +9,9 @@
 import UIKit
 import CoreData
 import UserNotifications
+import CoreLocation
 //class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
-class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UNUserNotificationCenterDelegate {
+class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UNUserNotificationCenterDelegate, CLLocationManagerDelegate{
     
     @IBOutlet weak var tableView:               UITableView!
     @IBOutlet weak var collectionView:          UICollectionView!
@@ -23,6 +24,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     let formatter = DateFormatter()
     var lastOffsetCapture = TimeInterval.abs(0)
     var previousOffset = CGPoint.init(x:0, y:0)
+    let locationManager = CLLocationManager()
 
     //MARK: CollectionView/Slider Methods
     
@@ -103,6 +105,11 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         let indexPath = collectionView.indexPathForItem(at: getSliderCenter())
         if ((indexPath != nil) && (indexPath!.row <= days.count - 1)) {
             noteTextView.text = days[(indexPath?.row)!].value(forKey: "note") as! String
+            currentDay = days[(indexPath?.row)!]
+            if days[(indexPath?.row)!].value(forKey: "longitude") != nil {
+                noteTextView.text = days[(indexPath?.row)!].value(forKey: "longitude") as! String
+
+            }
         }
     }
     
@@ -159,6 +166,8 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         day.setValue(note, forKey: "note")
         let date = Date()
         day.setValue(self.formatter.string(from: date), forKey: "date")
+        currentDay = day
+        locationManager.startUpdatingLocation()
         do {
             try managedObjectContext.save()
             days.append(day)
@@ -256,6 +265,35 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         createNotification(firingTime: "")
     }
 
+    //MARK: - Location Methods
+    func locationManager(_: CLLocationManager, didUpdateLocations: [CLLocation]){
+        print ("LOCATION LOCATION LOCATION")
+        print(didUpdateLocations[0].coordinate)
+        if currentDay.value(forKey: "longitude") == nil {
+            guard let appDelegate =
+                UIApplication.shared.delegate as? AppDelegate else {
+                    return
+            }
+            let managedObjectContext =
+                appDelegate.persistentContainer.viewContext
+            currentDay.setValue(String(format: "%f", didUpdateLocations[0].coordinate.longitude), forKey: "longitude")
+            currentDay.setValue(String(format: "%f", didUpdateLocations[0].coordinate.latitude), forKey: "latitude")
+            do {
+                try managedObjectContext.save()
+                fetchDays()
+//                days.append(day)
+            } catch let error as NSError {
+                print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
+            }//            getWeather(String(didUpdateLocations[0].coordinate.latitude), lon: String(didUpdateLocations[0].coordinate.longitude))
+        }
+        locationManager.stopUpdatingLocation()
+//        getLocationString(didUpdateLocations[0])
+    }
+    
+    @objc func locationManager(_: CLLocationManager, didFailWithError: Error) {
+        print (didFailWithError)
+    }
+    
     
     //MARK: Lifecycle Methods
     
@@ -273,6 +311,14 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             intentIdentifiers: [],
             options: [])
         UNUserNotificationCenter.current().setNotificationCategories([category])
+        if (CLLocationManager.locationServicesEnabled()) {
+            print ("LOCATION SERVICES ENABLED")
+            locationManager.requestWhenInUseAuthorization()
+            locationManager.requestAlwaysAuthorization()
+            locationManager.delegate = self
+            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            locationManager.startUpdatingLocation()
+        }
 //        let settings = UNNotificationSetting(forTypes: [.Alert, .Badge, .Sound], categories: categories)
 //        UIApplication.sharedApplication().registerUserNotificationSettings(settings)
         // Do any additional setup after loading the view, typically from a nib.
