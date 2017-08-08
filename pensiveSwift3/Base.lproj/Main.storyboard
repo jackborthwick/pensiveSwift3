@@ -7,6 +7,7 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -102,11 +103,18 @@
                     </view>
                     <extendedEdge key="edgesForExtendedLayout"/>
                     <navigationItem key="navigationItem" id="boc-SZ-STe">
-                        <barButtonItem key="rightBarButtonItem" title="+" id="sNG-kM-IQ0">
-                            <connections>
-                                <action selector="makeDayWith_sender:" destination="7aL-aV-fw9" id="2j3-J3-5b5"/>
-                            </connections>
-                        </barButtonItem>
+                        <rightBarButtonItems>
+                            <barButtonItem title="+" id="sNG-kM-IQ0">
+                                <connections>
+                                    <action selector="makeDayWith_sender:" destination="7aL-aV-fw9" id="2j3-J3-5b5"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem title="Alert" id="6mf-so-nhw">
+                                <connections>
+                                    <action selector="scheduleTestNotificationWith_sender:" destination="7aL-aV-fw9" id="DDe-mW-dSA"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
                     </navigationItem>
                     <connections>
                         <outlet property="collectionView" destination="3Xo-Bw-xIM" id="ulz-ma-RRx"/>

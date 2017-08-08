@@ -8,9 +8,9 @@
 
 import UIKit
 import CoreData
-
+import UserNotifications
 //class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
-class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate {
+class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UNUserNotificationCenterDelegate {
     
     @IBOutlet weak var tableView:               UITableView!
     @IBOutlet weak var collectionView:          UICollectionView!
@@ -106,6 +106,12 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         }
     }
     
+    func scrollToMostRecentDay() {
+        let indexPath = NSIndexPath(item: days.count, section: 0) // 1
+        self.collectionView.scrollToItem(at: indexPath as IndexPath, at: UICollectionViewScrollPosition.left, animated: true)
+        updateTextViewFromScroll()
+    }
+    
     
 //    //MARK: Table View Methods
 //    
@@ -177,6 +183,44 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             print("Could not fetch. \(error), \(error.userInfo)")
         }
     }
+    
+    //MARK: Local Notification Delegate Methods
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.alert, .sound, .badge])
+        
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let identifier = response.actionIdentifier
+        let textResponse = response as! UNTextInputNotificationResponse
+        self.saveDay(note: textResponse.userText, date: NSDate())
+        //            self.tableView.reloadData()
+        self.collectionView.reloadData()
+        print("Tapped in notification")
+    }
+    
+    //MARK: Local Notification Scheduling Methods
+
+    func createNotification(firingTime: String) {
+        if #available(iOS 10.0, *) {
+//            let commentAction = UNTextInputNotificationAction(identifier: "notificationId", title: "What's on your mind?", options: [], textInputButtonTitle: "Add", textInputPlaceholder: "")
+            let content = UNMutableNotificationContent()
+            content.title = "Hey?"
+            content.body = "What's on your mind?"
+            content.categoryIdentifier = "categoryId.category"
+            content.badge = 1
+            let date = Date(timeIntervalSinceNow: 3)
+            var dateCompenents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date)
+            let trigger = UNCalendarNotificationTrigger(dateMatching: dateCompenents, repeats: false)
+            let request = UNNotificationRequest(identifier: "notificationId", content: content, trigger: trigger)
+            UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+        }
+        
+    }
+    
+
+    
+
     //MARK: Interactivity Methods
     
     @IBAction func makeDay(_sender: AnyObject) {
@@ -207,13 +251,30 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         
         present(alert, animated: true)
     }
+    @IBAction func scheduleTestNotification(_sender: AnyObject) {
+        print ("pressed make notification")
+        createNotification(firingTime: "")
+    }
+
     
     //MARK: Lifecycle Methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.formatter.dateFormat = "dd.MM.yyyy.HH.mm.ss"
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound,.badge], completionHandler: {didAllow,Error in })
+        UNUserNotificationCenter.current().delegate = self
+        
 
+        let textAction = UNTextInputNotificationAction(identifier: "textActionId", title: "Enter Memory", options: [], textInputButtonTitle: "Add", textInputPlaceholder: "")
+        let category = UNNotificationCategory(
+            identifier: "categoryId.category",
+            actions: [textAction],
+            intentIdentifiers: [],
+            options: [])
+        UNUserNotificationCenter.current().setNotificationCategories([category])
+//        let settings = UNNotificationSetting(forTypes: [.Alert, .Badge, .Sound], categories: categories)
+//        UIApplication.sharedApplication().registerUserNotificationSettings(settings)
         // Do any additional setup after loading the view, typically from a nib.
 //
 //        tableView.register(UITableViewCell.self,
@@ -225,6 +286,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.fetchDays()
+        scrollToMostRecentDay()
 
     }
     
