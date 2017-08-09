@@ -106,8 +106,8 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         if ((indexPath != nil) && (indexPath!.row <= days.count - 1)) {
             noteTextView.text = days[(indexPath?.row)!].value(forKey: "note") as! String
             currentDay = days[(indexPath?.row)!]
-            if days[(indexPath?.row)!].value(forKey: "longitude") != nil {
-                noteTextView.text = days[(indexPath?.row)!].value(forKey: "longitude") as! String
+            if days[(indexPath?.row)!].value(forKey: "weather") != nil {
+                noteTextView.text = days[(indexPath?.row)!].value(forKey: "weather") as! String
 
             }
         }
@@ -278,6 +278,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                 appDelegate.persistentContainer.viewContext
             currentDay.setValue(String(format: "%f", didUpdateLocations[0].coordinate.longitude), forKey: "longitude")
             currentDay.setValue(String(format: "%f", didUpdateLocations[0].coordinate.latitude), forKey: "latitude")
+            currentDay.setValue(getWeather(lat: String(format: "%f", didUpdateLocations[0].coordinate.latitude), lon: String(format: "%f", didUpdateLocations[0].coordinate.longitude))[0] as! String, forKey: "weather")
             do {
                 try managedObjectContext.save()
                 fetchDays()
@@ -293,7 +294,27 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     @objc func locationManager(_: CLLocationManager, didFailWithError: Error) {
         print (didFailWithError)
     }
-    
+    //MARK: Weather Methods
+    func getWeather(lat:String, lon:String) -> [String] {
+        if let url = NSURL(string: "https://api.forecast.io/forecast/d3250bf407f0579c8355cd39cdd4f9e1/"+lat+","+lon) {
+            if let data = NSData(contentsOf: url as URL){
+                do {
+                    let parsed = try JSONSerialization.jsonObject(with: data as Data, options: JSONSerialization.ReadingOptions.allowFragments)
+                    print (parsed)
+                    let newDict = parsed as? NSDictionary
+                    print((newDict!["currently"]! as? NSDictionary)?["summary"])
+//                    self.weatherArray = ["\(newDict!["currently"]!["temperature"]!!.intValue)°",newDict!["currently"]!["icon"]!! as! String]
+//                    NSNotificationCenter.defaultCenter().postNotificationName("gotWeather", object: nil)
+                    return ["\(((newDict!["currently"]! as? NSDictionary)?["temperature"]!))°",(newDict!["currently"]! as? NSDictionary)?["icon"]! as! String]
+                }
+                catch let error {
+                    print("A JSON parsithng error occurred, here are the details:\n \(error)")
+                    return ["fuuuck"]
+                }
+            }
+        }
+        return ["suck"]
+    }
     
     //MARK: Lifecycle Methods
     
