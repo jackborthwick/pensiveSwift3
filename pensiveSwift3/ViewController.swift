@@ -11,7 +11,7 @@ import CoreData
 import UserNotifications
 import CoreLocation
 //class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
-class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UNUserNotificationCenterDelegate, CLLocationManagerDelegate{
+class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UNUserNotificationCenterDelegate, CLLocationManagerDelegate, UITextViewDelegate{
     
     @IBOutlet weak var tableView:               UITableView!
     @IBOutlet weak var collectionView:          UICollectionView!
@@ -26,6 +26,9 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     var previousOffset = CGPoint.init(x:0, y:0)
     let locationManager = CLLocationManager()
 
+    
+ 
+    
     //MARK: CollectionView/Slider Methods
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -158,10 +161,9 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                 return
         }
 
-
+        let managedObjectContext =
+            appDelegate.persistentContainer.viewContext
         if !(checkDayExistence(date: Date())) {
-            let managedObjectContext =
-                appDelegate.persistentContainer.viewContext
             let entityDescription =
                 NSEntityDescription.entity(forEntityName: "Day",
                                            in: managedObjectContext)!
@@ -181,6 +183,11 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         }
         else {
             days[days.count - 1].setValue(days[days.count - 1].value(forKey: "note") as! String + "\n" + note, forKey: "note")
+            do {
+                try managedObjectContext.save()
+            } catch let error as NSError {
+                print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
+            }
             //appending info
             fetchDays()
             print ("day already exists")
@@ -245,7 +252,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let identifier = response.actionIdentifier
         let textResponse = response as? UNTextInputNotificationResponse
-        if !(textResponse?.userText.isEmpty)! {
+        if (textResponse?.userText) != nil {
             self.saveDay(note: (textResponse?.userText)!, date: Date())
             //            self.tableView.reloadData()
             self.collectionView.reloadData()
@@ -336,7 +343,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             }//            getWeather(String(didUpdateLocations[0].coordinate.latitude), lon: String(didUpdateLocations[0].coordinate.longitude))
         }
         locationManager.stopUpdatingLocation()
-//        getLocationString(didUpdateLocations[0])
     }
     
     @objc func locationManager(_: CLLocationManager, didFailWithError: Error) {

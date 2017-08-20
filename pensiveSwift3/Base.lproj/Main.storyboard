@@ -7,7 +7,6 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
-        <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -103,18 +102,16 @@
                     </view>
                     <extendedEdge key="edgesForExtendedLayout"/>
                     <navigationItem key="navigationItem" id="boc-SZ-STe">
-                        <rightBarButtonItems>
-                            <barButtonItem title="+" id="sNG-kM-IQ0">
-                                <connections>
-                                    <action selector="makeDayWith_sender:" destination="7aL-aV-fw9" id="2j3-J3-5b5"/>
-                                </connections>
-                            </barButtonItem>
-                            <barButtonItem title="Alert" id="6mf-so-nhw">
-                                <connections>
-                                    <action selector="scheduleTestNotificationWith_sender:" destination="7aL-aV-fw9" id="DDe-mW-dSA"/>
-                                </connections>
-                            </barButtonItem>
-                        </rightBarButtonItems>
+                        <barButtonItem key="leftBarButtonItem" title="Set Notifications" id="vsr-6B-8Lf">
+                            <connections>
+                                <segue destination="LEX-TE-VGb" kind="show" id="fCK-lP-BmX"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" title="Alert" id="6mf-so-nhw">
+                            <connections>
+                                <action selector="scheduleTestNotificationWith_sender:" destination="7aL-aV-fw9" id="DDe-mW-dSA"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <connections>
                         <outlet property="collectionView" destination="3Xo-Bw-xIM" id="ulz-ma-RRx"/>
@@ -124,6 +121,100 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="jpe-Vq-RND" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-578.39999999999998" y="50.824587706146929"/>
+        </scene>
+        <!--Notification View Controller-->
+        <scene sceneID="Rl7-yA-b5z">
+            <objects>
+                <viewController id="LEX-TE-VGb" customClass="NotificationViewController" customModule="pensiveSwift3" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="4yJ-9P-dOi"/>
+                        <viewControllerLayoutGuide type="bottom" id="5nf-Pe-acp"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="1lL-IN-aXf">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Start Time" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Yj5-0z-x0f">
+                                <rect key="frame" x="0.0" y="64" width="375" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="End Time" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Itk-N7-ZId">
+                                <rect key="frame" x="0.0" y="323" width="375" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="dateAndTime" minuteInterval="1" translatesAutoresizingMaskIntoConstraints="NO" id="h43-kJ-KvI">
+                                <rect key="frame" x="10" y="333" width="375" height="216"/>
+                                <date key="date" timeIntervalSinceReferenceDate="524945795.44913203">
+                                    <!--2017-08-20 18:16:35 +0000-->
+                                </date>
+                            </datePicker>
+                            <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="dateAndTime" minuteInterval="1" translatesAutoresizingMaskIntoConstraints="NO" id="Us2-xa-RAO">
+                                <rect key="frame" x="0.0" y="93" width="375" height="216"/>
+                                <date key="date" timeIntervalSinceReferenceDate="524945735.57268798">
+                                    <!--2017-08-20 18:15:35 +0000-->
+                                </date>
+                            </datePicker>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Rgy-rV-oON">
+                                <rect key="frame" x="226" y="557" width="149" height="30"/>
+                                <nil key="textColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" keyboardType="ASCIICapableNumberPad" returnKeyType="continue" enablesReturnKeyAutomatically="YES"/>
+                                <connections>
+                                    <outlet property="delegate" destination="LEX-TE-VGb" id="yuz-ig-LTH"/>
+                                </connections>
+                            </textField>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="How many notifications?" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PN4-Lw-Ldb">
+                                <rect key="frame" x="0.0" y="557" width="187" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bEo-v8-7BE">
+                                <rect key="frame" x="0.0" y="586" width="375" height="81"/>
+                                <state key="normal" title="Button"/>
+                                <connections>
+                                    <action selector="scheduleNotificationsWith_sender:" destination="LEX-TE-VGb" eventType="touchUpInside" id="FcT-7M-hUW"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="Rgy-rV-oON" firstAttribute="leading" secondItem="PN4-Lw-Ldb" secondAttribute="trailing" constant="39" id="47T-cM-vUs"/>
+                            <constraint firstItem="Yj5-0z-x0f" firstAttribute="top" secondItem="4yJ-9P-dOi" secondAttribute="bottom" id="8Tf-pV-ZkJ"/>
+                            <constraint firstItem="Us2-xa-RAO" firstAttribute="leading" secondItem="Itk-N7-ZId" secondAttribute="leading" id="AHe-fS-hKB"/>
+                            <constraint firstItem="Itk-N7-ZId" firstAttribute="centerY" secondItem="1lL-IN-aXf" secondAttribute="centerY" id="HIt-0q-LQm"/>
+                            <constraint firstAttribute="trailing" secondItem="Yj5-0z-x0f" secondAttribute="trailing" id="MK9-33-UmZ"/>
+                            <constraint firstItem="bEo-v8-7BE" firstAttribute="top" secondItem="PN4-Lw-Ldb" secondAttribute="bottom" constant="8" symbolic="YES" id="N3W-dV-8pt"/>
+                            <constraint firstItem="PN4-Lw-Ldb" firstAttribute="top" secondItem="Rgy-rV-oON" secondAttribute="top" id="Ob8-ly-52X"/>
+                            <constraint firstItem="Rgy-rV-oON" firstAttribute="trailing" secondItem="bEo-v8-7BE" secondAttribute="trailing" id="Slt-Ek-uPF"/>
+                            <constraint firstItem="h43-kJ-KvI" firstAttribute="leading" secondItem="1lL-IN-aXf" secondAttribute="leadingMargin" constant="-6" id="YQm-xD-ygq"/>
+                            <constraint firstItem="Us2-xa-RAO" firstAttribute="top" secondItem="Yj5-0z-x0f" secondAttribute="bottom" constant="8" symbolic="YES" id="YSM-QK-9Fw"/>
+                            <constraint firstItem="Us2-xa-RAO" firstAttribute="trailing" secondItem="Itk-N7-ZId" secondAttribute="trailing" id="YoU-P1-V6R"/>
+                            <constraint firstItem="bEo-v8-7BE" firstAttribute="bottom" secondItem="5nf-Pe-acp" secondAttribute="top" id="bg0-6B-12k"/>
+                            <constraint firstItem="Yj5-0z-x0f" firstAttribute="leading" secondItem="Us2-xa-RAO" secondAttribute="leading" id="e47-lw-5vR"/>
+                            <constraint firstItem="Itk-N7-ZId" firstAttribute="trailing" secondItem="Rgy-rV-oON" secondAttribute="trailing" id="fxq-eq-4Ev"/>
+                            <constraint firstItem="Yj5-0z-x0f" firstAttribute="trailing" secondItem="Us2-xa-RAO" secondAttribute="trailing" id="hMq-Bz-heX"/>
+                            <constraint firstItem="5nf-Pe-acp" firstAttribute="top" secondItem="Rgy-rV-oON" secondAttribute="bottom" constant="80" id="oKl-2W-oaN"/>
+                            <constraint firstItem="Itk-N7-ZId" firstAttribute="leading" secondItem="PN4-Lw-Ldb" secondAttribute="leading" id="pbp-so-pFI"/>
+                            <constraint firstItem="PN4-Lw-Ldb" firstAttribute="leading" secondItem="bEo-v8-7BE" secondAttribute="leading" id="tKd-Ng-q8W"/>
+                            <constraint firstItem="Yj5-0z-x0f" firstAttribute="leading" secondItem="1lL-IN-aXf" secondAttribute="leading" id="uy2-jN-2Wu"/>
+                            <constraint firstItem="PN4-Lw-Ldb" firstAttribute="top" secondItem="h43-kJ-KvI" secondAttribute="bottom" constant="8" symbolic="YES" id="xbN-53-KOM"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="h43-kJ-KvI" secondAttribute="trailing" constant="-26" id="z2C-Dx-yLM"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="endDatePicker" destination="h43-kJ-KvI" id="Ls7-Nu-emq"/>
+                        <outlet property="notificationCountTextField" destination="Rgy-rV-oON" id="ASk-Q2-UlX"/>
+                        <outlet property="startDatePicker" destination="Us2-xa-RAO" id="XqY-ls-lQm"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="tQV-AC-1wd" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="220" y="-188.45577211394306"/>
         </scene>
     </scenes>
 </document>
