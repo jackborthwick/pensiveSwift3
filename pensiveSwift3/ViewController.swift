@@ -108,7 +108,9 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             currentDay = days[(indexPath?.row)!]
             if days[(indexPath?.row)!].value(forKey: "weather") != nil {
                 noteTextView.text = days[(indexPath?.row)!].value(forKey: "weather") as! String
-
+                noteTextView.text = (noteTextView.text + "\n" + "Latitude:" + (days[(indexPath?.row)!].value(forKey: "latitude") as! String))
+                noteTextView.text = noteTextView.text + "\n" + "Longitude:" + (days[(indexPath?.row)!].value(forKey: "longitude") as! String)
+                noteTextView.text = noteTextView.text + "\n" + "Note:" + (days[(indexPath?.row)!].value(forKey: "note") as! String)
             }
         }
     }
@@ -150,30 +152,40 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
 //    
     //MARK: Note CoreData Methods
     
-    func saveDay(note: String, date: NSDate) {
+    func saveDay(note: String, date: Date) {
         guard let appDelegate =
             UIApplication.shared.delegate as? AppDelegate else {
                 return
         }
 
-        let managedObjectContext =
-            appDelegate.persistentContainer.viewContext
-        let entityDescription =
-            NSEntityDescription.entity(forEntityName: "Day",
-                                       in: managedObjectContext)!
-        let day = NSManagedObject(entity: entityDescription, insertInto: managedObjectContext)
-        print (date)
-        day.setValue(note, forKey: "note")
-        let date = Date()
-        day.setValue(self.formatter.string(from: date), forKey: "date")
-        currentDay = day
-        locationManager.startUpdatingLocation()
-        do {
-            try managedObjectContext.save()
-            days.append(day)
-        } catch let error as NSError {
-            print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
+
+        if !(checkDayExistence(date: Date())) {
+            let managedObjectContext =
+                appDelegate.persistentContainer.viewContext
+            let entityDescription =
+                NSEntityDescription.entity(forEntityName: "Day",
+                                           in: managedObjectContext)!
+            let day = NSManagedObject(entity: entityDescription, insertInto: managedObjectContext)
+            print (date)
+            day.setValue(note, forKey: "note")
+            let date = Date()
+            day.setValue(self.formatter.string(from: date), forKey: "date")
+            currentDay = day
+            locationManager.startUpdatingLocation()
+            do {
+                try managedObjectContext.save()
+                days.append(day)
+            } catch let error as NSError {
+                print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
+            }
         }
+        else {
+            days[days.count - 1].setValue(days[days.count - 1].value(forKey: "note") as! String + "\n" + note, forKey: "note")
+            //appending info
+            fetchDays()
+            print ("day already exists")
+        }
+
     }
     func fetchDays (){
         guard let appDelegate =
@@ -188,9 +200,40 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         
         do {
             days = try managedObjectContext.fetch(fetchRequest)
+            collectionView.reloadData()
+            
         } catch let error as NSError {
             print("Could not fetch. \(error), \(error.userInfo)")
         }
+    }
+    func checkDayExistence(date: Date) -> Bool {
+        guard let appDelegate =
+            UIApplication.shared.delegate as? AppDelegate else {
+                return false
+        }
+        let managedObjectContext =
+            appDelegate.persistentContainer.viewContext
+        
+        let fetchRequest =
+            NSFetchRequest<NSManagedObject>(entityName: "Day")
+        let predicate = NSPredicate(format: "date = %@", self.formatter.string(from: date))
+        fetchRequest.predicate = predicate
+        do {
+            let fetchResults = try managedObjectContext.fetch(fetchRequest) as? [Day]
+            if fetchResults!.count > 0 {
+                print ("already have that day")
+                return true
+            }
+            else {
+                return false
+            }
+        }
+        catch let error as NSError {
+            print("Could not fetch. \(error), \(error.userInfo)")
+            return true
+            
+        }
+
     }
     
     //MARK: Local Notification Delegate Methods
@@ -201,11 +244,15 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let identifier = response.actionIdentifier
-        let textResponse = response as! UNTextInputNotificationResponse
-        self.saveDay(note: textResponse.userText, date: NSDate())
-        //            self.tableView.reloadData()
-        self.collectionView.reloadData()
-        print("Tapped in notification")
+        let textResponse = response as? UNTextInputNotificationResponse
+        if !(textResponse?.userText.isEmpty)! {
+            self.saveDay(note: (textResponse?.userText)!, date: Date())
+            //            self.tableView.reloadData()
+            self.collectionView.reloadData()
+            self.updateTextViewFromScroll()
+            print("Tapped in notification")
+        }
+
     }
     
     //MARK: Local Notification Scheduling Methods
@@ -245,7 +292,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                     return
             }
             
-            self.saveDay(note: noteToSave, date: NSDate())
+            self.saveDay(note: noteToSave, date: Date())
 //            self.tableView.reloadData()
             self.collectionView.reloadData()
         }
@@ -269,6 +316,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     func locationManager(_: CLLocationManager, didUpdateLocations: [CLLocation]){
         print ("LOCATION LOCATION LOCATION")
         print(didUpdateLocations[0].coordinate)
+
         if currentDay.value(forKey: "longitude") == nil {
             guard let appDelegate =
                 UIApplication.shared.delegate as? AppDelegate else {
@@ -320,7 +368,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.formatter.dateFormat = "dd.MM.yyyy.HH.mm.ss"
+        self.formatter.dateFormat = "dd.MM.yyyy"
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound,.badge], completionHandler: {didAllow,Error in })
         UNUserNotificationCenter.current().delegate = self
         
@@ -338,7 +386,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             locationManager.requestAlwaysAuthorization()
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-            locationManager.startUpdatingLocation()
+//            locationManager.startUpdatingLocation()
         }
 //        let settings = UNNotificationSetting(forTypes: [.Alert, .Badge, .Sound], categories: categories)
 //        UIApplication.sharedApplication().registerUserNotificationSettings(settings)
