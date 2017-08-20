@@ -146,19 +146,19 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="dateAndTime" minuteInterval="1" translatesAutoresizingMaskIntoConstraints="NO" id="h43-kJ-KvI">
+                            <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="time" minuteInterval="1" translatesAutoresizingMaskIntoConstraints="NO" id="h43-kJ-KvI">
                                 <rect key="frame" x="10" y="333" width="375" height="216"/>
                                 <date key="date" timeIntervalSinceReferenceDate="524945795.44913203">
                                     <!--2017-08-20 18:16:35 +0000-->
                                 </date>
                             </datePicker>
-                            <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="dateAndTime" minuteInterval="1" translatesAutoresizingMaskIntoConstraints="NO" id="Us2-xa-RAO">
+                            <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="time" minuteInterval="1" translatesAutoresizingMaskIntoConstraints="NO" id="Us2-xa-RAO">
                                 <rect key="frame" x="0.0" y="93" width="375" height="216"/>
-                                <date key="date" timeIntervalSinceReferenceDate="524945735.57268798">
-                                    <!--2017-08-20 18:15:35 +0000-->
+                                <date key="date" timeIntervalSinceReferenceDate="-62494282102.427315">
+                                    <!--0020-08-20 13:11:37 +0000-->
                                 </date>
                             </datePicker>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Rgy-rV-oON">
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="1" borderStyle="roundedRect" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Rgy-rV-oON">
                                 <rect key="frame" x="226" y="557" width="149" height="30"/>
                                 <nil key="textColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -177,7 +177,7 @@
                                 <rect key="frame" x="0.0" y="586" width="375" height="81"/>
                                 <state key="normal" title="Button"/>
                                 <connections>
-                                    <action selector="scheduleNotificationsWith_sender:" destination="LEX-TE-VGb" eventType="touchUpInside" id="FcT-7M-hUW"/>
+                                    <action selector="pressedScheduleNotificationsWith_sender:" destination="LEX-TE-VGb" eventType="touchUpInside" id="Xlp-tZ-3Dq"/>
                                 </connections>
                             </button>
                         </subviews>
