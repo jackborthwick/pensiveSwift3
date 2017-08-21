@@ -131,33 +131,32 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
 //    
     func tableView(_ tableView: UITableView,
                    numberOfRowsInSection section: Int) -> Int {
-//        return (self.currentDay.relationshipDayNote?.count)!
-//        if (self.currentDay.relationshipDayNote?.count ?? 0) > 0 {
-////            return self.currentDay.relationshipDayNote!.count
-//        }
-//        if self.currentDay.relationshipDayNote != nil {
-//            return self.currentDay.relationshipDayNote!.count
-//        }
-//        days[(indexPath?.row)!].relationshipDayNote!.count
-        return self.currentDay.relationshipDayNote?.count ?? 0
-
-//        return 1
+        if days.count > 0 {
+            return ((self.currentDay.relationshipDayNote?.count)! + 1) ?? 0
+        }
+        return 1
     }
     
     func tableView(_ tableView: UITableView,
                    cellForRowAt indexPath: IndexPath)
         -> UITableViewCell {
             if days.count != 0 {
-                let descriptors = [NSSortDescriptor(key: "date", ascending: true)] as [NSSortDescriptor]
+                if indexPath.row == (self.currentDay.relationshipDayNote?.count) {
+                    let cell =
+                        tableView.dequeueReusableCell(withIdentifier: "Cell",
+                                                      for: indexPath)
+                    cell.layoutMargins = UIEdgeInsets.zero
+                    cell.textLabel?.text = "add a new note"
+                    return cell
+                }
+                let descriptors = [NSSortDescriptor(key: "order", ascending: true)] as [NSSortDescriptor]
                 let notes = currentDay.relationshipDayNote?.sortedArray(using: descriptors) as NSArray!
-//                let day = days[indexPath.row]
                 let cell =
                     tableView.dequeueReusableCell(withIdentifier: "Cell",
                                               for: indexPath)
                 cell.layoutMargins = UIEdgeInsets.zero
                 cell.textLabel?.text = String(describing: (notes?[indexPath.row] as! Note).note)
-
-                
+                cell.textLabel?.text = (cell.textLabel?.text)! + String(describing:(notes?[indexPath.row] as! Note).date)
                 return cell
             }
             else {
@@ -180,11 +179,12 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
 
         let managedObjectContext =
             appDelegate.persistentContainer.viewContext
-        
+        let date = Date()
         let entityDescription =
             NSEntityDescription.entity(forEntityName: "Note",
                                        in: managedObjectContext)!
         let note = NSManagedObject(entity: entityDescription, insertInto: managedObjectContext) as! Note
+        note.date = self.formatter.string(from: date)
         note.note = noteString
         if !(checkDayExistence(date: Date())) {
             
@@ -193,9 +193,9 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                                            in: managedObjectContext)!
             let day = NSManagedObject(entity: entityDescription, insertInto: managedObjectContext) as! Day
             print (date)
-            let date = Date()
             day.setValue(self.formatter.string(from: date), forKey: "date")
             note.relationshipNotesDay = day
+            note.order = 0
             currentDay = day
             locationManager.startUpdatingLocation()
             do {
@@ -207,6 +207,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         }
         else {
             note.relationshipNotesDay = days[days.count - 1]
+            note.order = Int16((days[days.count - 1].relationshipDayNote?.count)!)
             do {
                 try managedObjectContext.save()
             } catch let error as NSError {
@@ -381,8 +382,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                     print (parsed)
                     let newDict = parsed as? NSDictionary
                     print((newDict!["currently"]! as? NSDictionary)?["summary"])
-//                    self.weatherArray = ["\(newDict!["currently"]!["temperature"]!!.intValue)°",newDict!["currently"]!["icon"]!! as! String]
-//                    NSNotificationCenter.defaultCenter().postNotificationName("gotWeather", object: nil)
                     return ["\(((newDict!["currently"]! as? NSDictionary)?["temperature"]!))°",(newDict!["currently"]! as? NSDictionary)?["icon"]! as! String]
                 }
                 catch let error {
@@ -425,12 +424,10 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         scrollToMostRecentDay()
-
     }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
 
 

@@ -18,6 +18,7 @@ extension Note {
 
     @NSManaged public var date: String?
     @NSManaged public var note: String?
+    @NSManaged public var order: Int16
     @NSManaged public var relationshipNotesDay: Day?
 
 }

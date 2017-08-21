@@ -10,6 +10,7 @@
     <entity name="Note" representedClassName="Note" syncable="YES">
         <attribute name="date" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="note" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="order" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <relationship name="relationshipNotesDay" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Day" inverseName="relationshipDayNote" inverseEntity="Day" syncable="YES"/>
     </entity>
     <entity name="NotificationSetting" representedClassName="NotificationSetting" syncable="YES">
@@ -21,6 +22,6 @@
     <elements>
         <element name="Day" positionX="-63" positionY="-18" width="128" height="120"/>
         <element name="NotificationSetting" positionX="-54" positionY="18" width="128" height="105"/>
-        <element name="Note" positionX="-54" positionY="27" width="128" height="90"/>
+        <element name="Note" positionX="-54" positionY="27" width="128" height="105"/>
     </elements>
 </model>
