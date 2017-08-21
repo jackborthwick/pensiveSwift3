@@ -131,7 +131,17 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
 //    
     func tableView(_ tableView: UITableView,
                    numberOfRowsInSection section: Int) -> Int {
-        return self.currentDay.relationshipDayNote!.count
+//        return (self.currentDay.relationshipDayNote?.count)!
+//        if (self.currentDay.relationshipDayNote?.count ?? 0) > 0 {
+////            return self.currentDay.relationshipDayNote!.count
+//        }
+//        if self.currentDay.relationshipDayNote != nil {
+//            return self.currentDay.relationshipDayNote!.count
+//        }
+//        days[(indexPath?.row)!].relationshipDayNote!.count
+        return self.currentDay.relationshipDayNote?.count ?? 0
+
+//        return 1
     }
     
     func tableView(_ tableView: UITableView,
@@ -175,10 +185,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             NSEntityDescription.entity(forEntityName: "Note",
                                        in: managedObjectContext)!
         let note = NSManagedObject(entity: entityDescription, insertInto: managedObjectContext) as! Note
-        print ("setting note")
-
         note.note = noteString
-        print ("set note")
         if !(checkDayExistence(date: Date())) {
             
             let entityDescription =
@@ -188,29 +195,23 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             print (date)
             let date = Date()
             day.setValue(self.formatter.string(from: date), forKey: "date")
-            print ("set date")
             note.relationshipNotesDay = day
-            print ("set relationship")
             currentDay = day
             locationManager.startUpdatingLocation()
-            print ("set relationship")
             do {
                 try managedObjectContext.save()
                 days.append(day)
-                print ("set relationship")
             } catch let error as NSError {
                 print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
             }
         }
         else {
-//            days[days.count - 1].setValue((days[days.count - 1].value(forKey: "note") as! String) + "\n" + noteString, forKey: "note")
             note.relationshipNotesDay = days[days.count - 1]
             do {
                 try managedObjectContext.save()
             } catch let error as NSError {
                 print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
             }
-            //appending info
             fetchDays()
             print ("day already exists")
         }
@@ -225,7 +226,12 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             appDelegate.persistentContainer.viewContext
         do {
             days = try managedObjectContext.fetch(Day.fetchRequest())
+            if days.count > 0 {
+                currentDay = days[days.count - 1]
+
+            }
             collectionView.reloadData()
+//            updateTextViewFromScroll()
             
         } catch let error as NSError {
             print("Could not fetch. \(error), \(error.userInfo)")
@@ -392,6 +398,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.fetchDays()
         self.formatter.dateFormat = "dd.MM.yyyy"
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound,.badge], completionHandler: {didAllow,Error in })
         UNUserNotificationCenter.current().delegate = self
@@ -410,21 +417,13 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             locationManager.requestAlwaysAuthorization()
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-//            locationManager.startUpdatingLocation()
         }
-//        let settings = UNNotificationSetting(forTypes: [.Alert, .Badge, .Sound], categories: categories)
-//        UIApplication.sharedApplication().registerUserNotificationSettings(settings)
-        // Do any additional setup after loading the view, typically from a nib.
-//
-//        tableView.register(UITableViewCell.self,
-//                           forCellReuseIdentifier: "Cell")
-//        tableView.layoutMargins = UIEdgeInsets.zero
-//        tableView.separatorInset = UIEdgeInsets.zero
+        tableView.layoutMargins = UIEdgeInsets.zero
+        tableView.separatorInset = UIEdgeInsets.zero
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.fetchDays()
         scrollToMostRecentDay()
 
     }
