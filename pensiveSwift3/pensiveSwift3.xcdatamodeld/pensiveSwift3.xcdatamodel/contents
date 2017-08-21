@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="12141" systemVersion="16G29" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <entity name="Day" representedClassName="Day" syncable="YES" codeGenerationType="class">
+    <entity name="Day" representedClassName="Day" syncable="YES">
         <attribute name="date" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="latitude" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="longitude" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="note" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="weather" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="relationshipDayNote" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Note" inverseName="relationshipNotesDay" inverseEntity="Note" syncable="YES"/>
     </entity>
-    <entity name="NotificationSetting" representedClassName="NotificationSetting" syncable="YES" codeGenerationType="class">
+    <entity name="Note" representedClassName="Note" syncable="YES">
+        <attribute name="date" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="note" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="relationshipNotesDay" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Day" inverseName="relationshipDayNote" inverseEntity="Day" syncable="YES"/>
+    </entity>
+    <entity name="NotificationSetting" representedClassName="NotificationSetting" syncable="YES">
         <attribute name="count" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="endTime" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="soundOn" optional="YES" attributeType="Boolean" usesScalarValueType="YES" syncable="YES"/>
@@ -16,5 +21,6 @@
     <elements>
         <element name="Day" positionX="-63" positionY="-18" width="128" height="120"/>
         <element name="NotificationSetting" positionX="-54" positionY="18" width="128" height="105"/>
+        <element name="Note" positionX="-54" positionY="27" width="128" height="90"/>
     </elements>
 </model>

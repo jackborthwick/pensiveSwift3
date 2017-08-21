@@ -11,15 +11,15 @@ import CoreData
 import UserNotifications
 import CoreLocation
 //class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
-class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UNUserNotificationCenterDelegate, CLLocationManagerDelegate, UITextViewDelegate{
+class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UNUserNotificationCenterDelegate, CLLocationManagerDelegate, UITextViewDelegate, UITableViewDelegate,UITableViewDataSource{
     
     @IBOutlet weak var tableView:               UITableView!
     @IBOutlet weak var collectionView:          UICollectionView!
     @IBOutlet weak var noteTextView:            UITextView!
 
     
-    var days: [NSManagedObject] = []
-    var currentDay = NSManagedObject()
+    var days: [Day] = []
+    var currentDay = Day()
     let reuseIdentifierCollectionView = "CVCell"
     let formatter = DateFormatter()
     var lastOffsetCapture = TimeInterval.abs(0)
@@ -107,13 +107,15 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     func updateTextViewFromScroll () {
         let indexPath = collectionView.indexPathForItem(at: getSliderCenter())
         if ((indexPath != nil) && (indexPath!.row <= days.count - 1)) {
-            noteTextView.text = days[(indexPath?.row)!].value(forKey: "note") as! String
+            noteTextView.text = String(describing: days[(indexPath?.row)!].relationshipDayNote!.allObjects.count)
+
             currentDay = days[(indexPath?.row)!]
             if days[(indexPath?.row)!].value(forKey: "weather") != nil {
                 noteTextView.text = days[(indexPath?.row)!].value(forKey: "weather") as! String
                 noteTextView.text = (noteTextView.text + "\n" + "Latitude:" + (days[(indexPath?.row)!].value(forKey: "latitude") as! String))
                 noteTextView.text = noteTextView.text + "\n" + "Longitude:" + (days[(indexPath?.row)!].value(forKey: "longitude") as! String)
-                noteTextView.text = noteTextView.text + "\n" + "Note:" + (days[(indexPath?.row)!].value(forKey: "note") as! String)
+                noteTextView.text = noteTextView.text + "\n" + String(days[(indexPath?.row)!].relationshipDayNote!.count)
+                tableView.reloadData()
             }
         }
     }
@@ -127,62 +129,82 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
 //    //MARK: Table View Methods
 //    
-//    func tableView(_ tableView: UITableView,
-//                   numberOfRowsInSection section: Int) -> Int {
-//        return days.count
-//    }
-//    
-//    func tableView(_ tableView: UITableView,
-//                   cellForRowAt indexPath: IndexPath)
-//        -> UITableViewCell {
-//            if days.count != 0 {
+    func tableView(_ tableView: UITableView,
+                   numberOfRowsInSection section: Int) -> Int {
+        return self.currentDay.relationshipDayNote!.count
+    }
+    
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath)
+        -> UITableViewCell {
+            if days.count != 0 {
+                let descriptors = [NSSortDescriptor(key: "date", ascending: true)] as [NSSortDescriptor]
+                let notes = currentDay.relationshipDayNote?.sortedArray(using: descriptors) as NSArray!
 //                let day = days[indexPath.row]
-//                let cell =
-//                    tableView.dequeueReusableCell(withIdentifier: "Cell",
-//                                              for: indexPath)
-//                cell.layoutMargins = UIEdgeInsets.zero
-//                cell.textLabel?.text = day.value(forKey: "note") as? String
-//                return cell
-//            }
-//            else {
-//                let cell =
-//                    tableView.dequeueReusableCell(withIdentifier: "Cell",
-//                                                  for: indexPath)
-//                cell.textLabel?.text = "No days"
-//                return cell
-//            }
-//    }
-//    
+                let cell =
+                    tableView.dequeueReusableCell(withIdentifier: "Cell",
+                                              for: indexPath)
+                cell.layoutMargins = UIEdgeInsets.zero
+                cell.textLabel?.text = String(describing: (notes?[indexPath.row] as! Note).note)
+
+                
+                return cell
+            }
+            else {
+                let cell =
+                    tableView.dequeueReusableCell(withIdentifier: "Cell",
+                                                  for: indexPath)
+                cell.textLabel?.text = "No days"
+                return cell
+            }
+    }
+//
     //MARK: Note CoreData Methods
     
-    func saveDay(note: String, date: Date) {
+    func saveDay(noteString: String, date: Date) {
         guard let appDelegate =
             UIApplication.shared.delegate as? AppDelegate else {
                 return
         }
+        print ("setting note")
 
         let managedObjectContext =
             appDelegate.persistentContainer.viewContext
+        
+        let entityDescription =
+            NSEntityDescription.entity(forEntityName: "Note",
+                                       in: managedObjectContext)!
+        let note = NSManagedObject(entity: entityDescription, insertInto: managedObjectContext) as! Note
+        print ("setting note")
+
+        note.note = noteString
+        print ("set note")
         if !(checkDayExistence(date: Date())) {
+            
             let entityDescription =
                 NSEntityDescription.entity(forEntityName: "Day",
                                            in: managedObjectContext)!
-            let day = NSManagedObject(entity: entityDescription, insertInto: managedObjectContext)
+            let day = NSManagedObject(entity: entityDescription, insertInto: managedObjectContext) as! Day
             print (date)
-            day.setValue(note, forKey: "note")
             let date = Date()
             day.setValue(self.formatter.string(from: date), forKey: "date")
+            print ("set date")
+            note.relationshipNotesDay = day
+            print ("set relationship")
             currentDay = day
             locationManager.startUpdatingLocation()
+            print ("set relationship")
             do {
                 try managedObjectContext.save()
                 days.append(day)
+                print ("set relationship")
             } catch let error as NSError {
                 print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
             }
         }
         else {
-            days[days.count - 1].setValue(days[days.count - 1].value(forKey: "note") as! String + "\n" + note, forKey: "note")
+//            days[days.count - 1].setValue((days[days.count - 1].value(forKey: "note") as! String) + "\n" + noteString, forKey: "note")
+            note.relationshipNotesDay = days[days.count - 1]
             do {
                 try managedObjectContext.save()
             } catch let error as NSError {
@@ -201,12 +223,8 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         }
         let managedObjectContext =
             appDelegate.persistentContainer.viewContext
-        
-        let fetchRequest =
-            NSFetchRequest<NSManagedObject>(entityName: "Day")
-        
         do {
-            days = try managedObjectContext.fetch(fetchRequest)
+            days = try managedObjectContext.fetch(Day.fetchRequest())
             collectionView.reloadData()
             
         } catch let error as NSError {
@@ -253,7 +271,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         let identifier = response.actionIdentifier
         let textResponse = response as? UNTextInputNotificationResponse
         if (textResponse?.userText) != nil {
-            self.saveDay(note: (textResponse?.userText)!, date: Date())
+            self.saveDay(noteString: (textResponse?.userText)!, date: Date())
             //            self.tableView.reloadData()
             self.collectionView.reloadData()
             self.updateTextViewFromScroll()
@@ -299,7 +317,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                     return
             }
             
-            self.saveDay(note: noteToSave, date: Date())
+            self.saveDay(noteString: noteToSave, date: Date())
 //            self.tableView.reloadData()
             self.collectionView.reloadData()
         }
