@@ -21,7 +21,6 @@ class NoteViewController: UIViewController, UITextViewDelegate {
         super.viewDidLoad()
         textView.text = selectedNote.note
         textView.delegate = self
-        // Do any additional setup after loading the view.
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -29,8 +28,6 @@ class NoteViewController: UIViewController, UITextViewDelegate {
             UIApplication.shared.delegate as? AppDelegate else {
                 return
         }
-        print ("setting note")
-        
         let managedObjectContext =
             appDelegate.persistentContainer.viewContext
         do {

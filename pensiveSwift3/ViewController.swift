@@ -179,11 +179,59 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         
         let descriptors = [NSSortDescriptor(key: "order", ascending: true)] as [NSSortDescriptor]
         let notes = currentDay.relationshipDayNote?.sortedArray(using: descriptors) as! [Note]!
-        print(notes)
-        print(notes?.count)
-        print(indexPath.row)
-        self.selectedNote = (notes?[indexPath.row])!
+        if indexPath.row != notes?.count {
+            self.selectedNote = (notes?[indexPath.row])!
+        }
+        else {
+            guard let appDelegate =
+                UIApplication.shared.delegate as? AppDelegate else {
+                    return
+            }
+            let managedObjectContext =
+                appDelegate.persistentContainer.viewContext
+            let entityDescription =
+                NSEntityDescription.entity(forEntityName: "Note",
+                                           in: managedObjectContext)!
+            let newNote = NSManagedObject(entity: entityDescription, insertInto: managedObjectContext) as! Note
+            newNote.order = Int16((currentDay.relationshipDayNote?.count)!)
+            newNote.date = self.formatter.string(from: Date())
+            currentDay.addToRelationshipDayNote(newNote)
+            self.selectedNote = newNote
+
+        }
         performSegue(withIdentifier: noteSegueIdentifier, sender: nil)
+
+    }
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        let descriptors = [NSSortDescriptor(key: "order", ascending: true)] as [NSSortDescriptor]
+        let notes = currentDay.relationshipDayNote?.sortedArray(using: descriptors) as! [Note]!
+        if indexPath.row != notes?.count {
+            return true
+        }
+        return false
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if (editingStyle == UITableViewCellEditingStyle.delete) {
+            let descriptors = [NSSortDescriptor(key: "order", ascending: true)] as [NSSortDescriptor]
+            let notes = currentDay.relationshipDayNote?.sortedArray(using: descriptors) as! [Note]!
+            guard let appDelegate =
+                UIApplication.shared.delegate as? AppDelegate else {
+                    return
+            }
+            print ("setting note")
+            
+            let managedObjectContext =
+                appDelegate.persistentContainer.viewContext
+            managedObjectContext.delete((notes?[indexPath.row])!)
+            do {
+                try managedObjectContext.save()
+            } catch let error as NSError {
+                print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
+            }
+            updateTextViewFromScroll()
+            // handle delete (by removing the data from your array and updating the tableview)
+        }
     }
 //
     //MARK: Note CoreData Methods
