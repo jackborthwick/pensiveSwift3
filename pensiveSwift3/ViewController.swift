@@ -77,23 +77,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if scrollView == collectionView {
-//            let indexPath = memorySliderCollectionView.indexPathForItemAtPoint(getSliderCenter())
-//            if ((indexPath != nil) && (indexPath!.row <= memoryArray.count - 1)) {
-//                currentMemory = memoryArray[(indexPath?.row)!]
-//                let dateFormatter  = NSDateFormatter()
-//                dateFormatter.dateFormat = "EEEE MMM d"
-//                if currentMemory.memoryTempHigh == 0 {
-//                    currentTemp.hidden = true
-//                }
-//                else if currentMemory.memoryTempHigh != nil {
-//                    currentTemp.text = String(currentMemory.memoryTempHigh!)
-//                    currentTemp.hidden = false
-//                }
-//                else {
-//                    //                    currentTemp.hidden = true
-//                }
-//                //                navigationItem.title = dateFormatter.stringFromDate(currentMemory.memoryDate!)
-//            }
             let currentOffset = scrollView.contentOffset
             let currentTime = NSDate.timeIntervalSinceReferenceDate
             let timeDiff = currentTime - lastOffsetCapture
@@ -349,6 +332,15 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             self.collectionView.reloadData()
             self.updateTextViewFromScroll()
             print("Tapped in notification")
+        }
+        else {
+            let alert = UIAlertController(title: "Opps",
+                                          message: "If you want to enter a note using a notification you must enter it in the text field.",
+                                          preferredStyle: .alert)
+            let okAction = UIAlertAction(title: "Cancel",
+                                             style: .default)
+            alert.addAction(okAction)
+            present(alert, animated: true)
         }
 
     }
