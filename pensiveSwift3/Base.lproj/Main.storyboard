@@ -182,7 +182,7 @@
             </objects>
             <point key="canvasLocation" x="44" y="157.87106446776613"/>
         </scene>
-        <!--Notification View Controller-->
+        <!--Title-->
         <scene sceneID="Rl7-yA-b5z">
             <objects>
                 <viewController id="LEX-TE-VGb" customClass="NotificationViewController" customModule="pensiveSwift3" customModuleProvider="target" sceneMemberID="viewController">
@@ -196,85 +196,112 @@
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Start Time" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Yj5-0z-x0f">
                                 <rect key="frame" x="0.0" y="64" width="375" height="21"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="21" id="87L-r1-xj4"/>
+                                </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="End Time" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Itk-N7-ZId">
-                                <rect key="frame" x="0.0" y="323" width="375" height="21"/>
+                                <rect key="frame" x="0.0" y="284" width="72" height="60"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="60" id="Wnm-C5-AU6"/>
+                                </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="time" minuteInterval="1" translatesAutoresizingMaskIntoConstraints="NO" id="h43-kJ-KvI">
-                                <rect key="frame" x="10" y="333" width="375" height="216"/>
-                                <date key="date" timeIntervalSinceReferenceDate="524945795.44913203">
-                                    <!--2017-08-20 18:16:35 +0000-->
-                                </date>
-                            </datePicker>
                             <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="time" minuteInterval="1" translatesAutoresizingMaskIntoConstraints="NO" id="Us2-xa-RAO">
-                                <rect key="frame" x="0.0" y="93" width="375" height="216"/>
+                                <rect key="frame" x="0.0" y="93" width="375" height="174"/>
                                 <date key="date" timeIntervalSinceReferenceDate="-62494282102.427315">
                                     <!--0020-08-20 13:11:37 +0000-->
                                 </date>
                             </datePicker>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="1" borderStyle="roundedRect" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Rgy-rV-oON">
-                                <rect key="frame" x="226" y="557" width="149" height="30"/>
-                                <nil key="textColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" keyboardType="ASCIICapableNumberPad" returnKeyType="continue" enablesReturnKeyAutomatically="YES"/>
-                                <connections>
-                                    <outlet property="delegate" destination="LEX-TE-VGb" id="yuz-ig-LTH"/>
-                                </connections>
-                            </textField>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="How many notifications?" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PN4-Lw-Ldb">
-                                <rect key="frame" x="0.0" y="557" width="187" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bEo-v8-7BE">
-                                <rect key="frame" x="0.0" y="586" width="375" height="81"/>
+                                <rect key="frame" x="0.0" y="547" width="375" height="76"/>
                                 <state key="normal" title="Button"/>
                                 <connections>
                                     <action selector="pressedScheduleNotificationsWith_sender:" destination="LEX-TE-VGb" eventType="touchUpInside" id="Xlp-tZ-3Dq"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="How many notifications?" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PN4-Lw-Ldb">
+                                <rect key="frame" x="0.0" y="518" width="187" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KAe-j2-wV1">
+                                <rect key="frame" x="310" y="512" width="65" height="39"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="65" id="jGz-oD-CIc"/>
+                                    <constraint firstAttribute="height" constant="39" id="pxz-qn-tKh"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <stepper opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="2" minimumValue="1" maximumValue="12" translatesAutoresizingMaskIntoConstraints="NO" id="jP3-Nc-DaN">
+                                <rect key="frame" x="208" y="518" width="94" height="29"/>
+                                <connections>
+                                    <action selector="notificationStepperChangedWith_sender:" destination="LEX-TE-VGb" eventType="valueChanged" id="UJA-Gp-n0I"/>
+                                </connections>
+                            </stepper>
+                            <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="time" minuteInterval="1" translatesAutoresizingMaskIntoConstraints="NO" id="h43-kJ-KvI">
+                                <rect key="frame" x="0.0" y="340" width="375" height="170"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="170" id="Err-aU-daj"/>
+                                </constraints>
+                                <date key="date" timeIntervalSinceReferenceDate="524945795.44913203">
+                                    <!--2017-08-20 18:16:35 +0000-->
+                                </date>
+                            </datePicker>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="Rgy-rV-oON" firstAttribute="leading" secondItem="PN4-Lw-Ldb" secondAttribute="trailing" constant="39" id="47T-cM-vUs"/>
-                            <constraint firstItem="Yj5-0z-x0f" firstAttribute="top" secondItem="4yJ-9P-dOi" secondAttribute="bottom" id="8Tf-pV-ZkJ"/>
-                            <constraint firstItem="Us2-xa-RAO" firstAttribute="leading" secondItem="Itk-N7-ZId" secondAttribute="leading" id="AHe-fS-hKB"/>
-                            <constraint firstItem="Itk-N7-ZId" firstAttribute="centerY" secondItem="1lL-IN-aXf" secondAttribute="centerY" id="HIt-0q-LQm"/>
-                            <constraint firstAttribute="trailing" secondItem="Yj5-0z-x0f" secondAttribute="trailing" id="MK9-33-UmZ"/>
-                            <constraint firstItem="bEo-v8-7BE" firstAttribute="top" secondItem="PN4-Lw-Ldb" secondAttribute="bottom" constant="8" symbolic="YES" id="N3W-dV-8pt"/>
-                            <constraint firstItem="PN4-Lw-Ldb" firstAttribute="top" secondItem="Rgy-rV-oON" secondAttribute="top" id="Ob8-ly-52X"/>
-                            <constraint firstItem="Rgy-rV-oON" firstAttribute="trailing" secondItem="bEo-v8-7BE" secondAttribute="trailing" id="Slt-Ek-uPF"/>
-                            <constraint firstItem="h43-kJ-KvI" firstAttribute="leading" secondItem="1lL-IN-aXf" secondAttribute="leadingMargin" constant="-6" id="YQm-xD-ygq"/>
-                            <constraint firstItem="Us2-xa-RAO" firstAttribute="top" secondItem="Yj5-0z-x0f" secondAttribute="bottom" constant="8" symbolic="YES" id="YSM-QK-9Fw"/>
-                            <constraint firstItem="Us2-xa-RAO" firstAttribute="trailing" secondItem="Itk-N7-ZId" secondAttribute="trailing" id="YoU-P1-V6R"/>
-                            <constraint firstItem="bEo-v8-7BE" firstAttribute="bottom" secondItem="5nf-Pe-acp" secondAttribute="top" id="bg0-6B-12k"/>
-                            <constraint firstItem="Yj5-0z-x0f" firstAttribute="leading" secondItem="Us2-xa-RAO" secondAttribute="leading" id="e47-lw-5vR"/>
-                            <constraint firstItem="Itk-N7-ZId" firstAttribute="trailing" secondItem="Rgy-rV-oON" secondAttribute="trailing" id="fxq-eq-4Ev"/>
-                            <constraint firstItem="Yj5-0z-x0f" firstAttribute="trailing" secondItem="Us2-xa-RAO" secondAttribute="trailing" id="hMq-Bz-heX"/>
-                            <constraint firstItem="5nf-Pe-acp" firstAttribute="top" secondItem="Rgy-rV-oON" secondAttribute="bottom" constant="80" id="oKl-2W-oaN"/>
-                            <constraint firstItem="Itk-N7-ZId" firstAttribute="leading" secondItem="PN4-Lw-Ldb" secondAttribute="leading" id="pbp-so-pFI"/>
-                            <constraint firstItem="PN4-Lw-Ldb" firstAttribute="leading" secondItem="bEo-v8-7BE" secondAttribute="leading" id="tKd-Ng-q8W"/>
-                            <constraint firstItem="Yj5-0z-x0f" firstAttribute="leading" secondItem="1lL-IN-aXf" secondAttribute="leading" id="uy2-jN-2Wu"/>
-                            <constraint firstItem="PN4-Lw-Ldb" firstAttribute="top" secondItem="h43-kJ-KvI" secondAttribute="bottom" constant="8" symbolic="YES" id="xbN-53-KOM"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="h43-kJ-KvI" secondAttribute="trailing" constant="-26" id="z2C-Dx-yLM"/>
+                            <constraint firstItem="PN4-Lw-Ldb" firstAttribute="top" secondItem="h43-kJ-KvI" secondAttribute="bottom" constant="8" symbolic="YES" id="0Sd-sb-2yR"/>
+                            <constraint firstItem="KAe-j2-wV1" firstAttribute="leading" secondItem="jP3-Nc-DaN" secondAttribute="trailing" constant="8" symbolic="YES" id="13a-CQ-blg"/>
+                            <constraint firstItem="Yj5-0z-x0f" firstAttribute="trailing" secondItem="Us2-xa-RAO" secondAttribute="trailing" id="2zx-qY-9Gz"/>
+                            <constraint firstItem="Itk-N7-ZId" firstAttribute="top" secondItem="Us2-xa-RAO" secondAttribute="bottom" constant="17" id="Dl1-FG-FmS"/>
+                            <constraint firstItem="h43-kJ-KvI" firstAttribute="trailing" secondItem="KAe-j2-wV1" secondAttribute="trailing" id="Fyf-bH-uff"/>
+                            <constraint firstItem="KAe-j2-wV1" firstAttribute="trailing" secondItem="bEo-v8-7BE" secondAttribute="trailing" id="HHM-Rb-RFW"/>
+                            <constraint firstItem="Yj5-0z-x0f" firstAttribute="leading" secondItem="Us2-xa-RAO" secondAttribute="leading" id="OZS-vh-JcA"/>
+                            <constraint firstItem="h43-kJ-KvI" firstAttribute="top" secondItem="Us2-xa-RAO" secondAttribute="bottom" constant="73" id="SzT-tk-yvU"/>
+                            <constraint firstItem="Itk-N7-ZId" firstAttribute="leading" secondItem="h43-kJ-KvI" secondAttribute="leading" id="U8w-rz-Fn1"/>
+                            <constraint firstItem="Us2-xa-RAO" firstAttribute="trailing" secondItem="h43-kJ-KvI" secondAttribute="trailing" id="axK-WT-xOL"/>
+                            <constraint firstItem="Yj5-0z-x0f" firstAttribute="top" secondItem="4yJ-9P-dOi" secondAttribute="bottom" id="fZX-jT-zNF"/>
+                            <constraint firstItem="h43-kJ-KvI" firstAttribute="leading" secondItem="PN4-Lw-Ldb" secondAttribute="leading" id="m9Z-lb-XUd"/>
+                            <constraint firstItem="KAe-j2-wV1" firstAttribute="top" secondItem="h43-kJ-KvI" secondAttribute="bottom" constant="2" id="nOF-7g-7EU"/>
+                            <constraint firstItem="PN4-Lw-Ldb" firstAttribute="top" secondItem="jP3-Nc-DaN" secondAttribute="top" id="pwy-R7-8eW"/>
+                            <constraint firstItem="Us2-xa-RAO" firstAttribute="top" secondItem="Yj5-0z-x0f" secondAttribute="bottom" constant="8" symbolic="YES" id="rdS-l2-d4X"/>
+                            <constraint firstItem="PN4-Lw-Ldb" firstAttribute="leading" secondItem="bEo-v8-7BE" secondAttribute="leading" id="twj-Ss-Cdv"/>
+                            <constraint firstAttribute="trailing" secondItem="Yj5-0z-x0f" secondAttribute="trailing" id="uGs-oI-Hrh"/>
+                            <constraint firstItem="bEo-v8-7BE" firstAttribute="bottom" secondItem="5nf-Pe-acp" secondAttribute="top" id="uTf-zP-6DP"/>
+                            <constraint firstItem="Yj5-0z-x0f" firstAttribute="leading" secondItem="1lL-IN-aXf" secondAttribute="leading" id="xAn-bD-pK4"/>
+                            <constraint firstItem="Us2-xa-RAO" firstAttribute="leading" secondItem="Itk-N7-ZId" secondAttribute="leading" id="xAw-lc-dOb"/>
+                            <constraint firstItem="5nf-Pe-acp" firstAttribute="top" secondItem="KAe-j2-wV1" secondAttribute="bottom" constant="72" id="xbl-9J-t7C"/>
+                            <constraint firstItem="bEo-v8-7BE" firstAttribute="top" secondItem="PN4-Lw-Ldb" secondAttribute="bottom" constant="8" symbolic="YES" id="yuT-9D-NwY"/>
                         </constraints>
                     </view>
+                    <toolbarItems/>
+                    <navigationItem key="navigationItem" title="Title" id="amT-Xa-Hgq">
+                        <barButtonItem key="rightBarButtonItem" title="Delete Notifications" id="vUf-Rg-zNX">
+                            <connections>
+                                <action selector="pressedDeleteNotificationsWith_sender:" destination="LEX-TE-VGb" id="eGF-V7-1Fg"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="endDatePicker" destination="h43-kJ-KvI" id="Ls7-Nu-emq"/>
-                        <outlet property="notificationCountTextField" destination="Rgy-rV-oON" id="ASk-Q2-UlX"/>
+                        <outlet property="notificationCountLabel" destination="KAe-j2-wV1" id="grK-Je-VN5"/>
+                        <outlet property="notificationStepper" destination="jP3-Nc-DaN" id="hsD-pN-oO1"/>
                         <outlet property="startDatePicker" destination="Us2-xa-RAO" id="XqY-ls-lQm"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tQV-AC-1wd" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1484" y="155"/>
+            <point key="canvasLocation" x="-1484" y="154.27286356821591"/>
         </scene>
     </scenes>
 </document>

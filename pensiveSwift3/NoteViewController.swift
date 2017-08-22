@@ -14,24 +14,29 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     var selectedNote = Note()
     
     func textViewDidChange(_ textView: UITextView) { //Handle the text changes here
-        print(textView.text); //the textView parameter is the textView where text was changed
         selectedNote.note = textView.text
     }
     override func viewDidLoad() {
         super.viewDidLoad()
         textView.text = selectedNote.note
         textView.delegate = self
+        textView.becomeFirstResponder()
     }
     
-    override func viewDidDisappear(_ animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         guard let appDelegate =
             UIApplication.shared.delegate as? AppDelegate else {
                 return
         }
         let managedObjectContext =
             appDelegate.persistentContainer.viewContext
+        if selectedNote.note == nil {
+            managedObjectContext.delete(selectedNote)
+            print ("deleted")
+        }
         do {
             try managedObjectContext.save()
+            
         } catch let error as NSError {
             print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
         }

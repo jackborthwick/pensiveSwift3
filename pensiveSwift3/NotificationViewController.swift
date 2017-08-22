@@ -8,33 +8,86 @@
 
 import UIKit
 import UserNotifications
-class NotificationViewController: UIViewController, UITextFieldDelegate {
-    @IBOutlet weak var notificationCountTextField:              UITextField!
+class NotificationViewController: UIViewController {
     @IBOutlet weak var startDatePicker:                         UIDatePicker!
     @IBOutlet weak var endDatePicker:                           UIDatePicker!
+    @IBOutlet weak var notificationStepper:                     UIStepper!
+    @IBOutlet weak var notificationCountLabel:                  UILabel!
     
+    var formatter     =         DateFormatter()
     var startTime     =         Date()
     var endTime       =         Date()
 
     @IBAction func pressedScheduleNotifications(_sender: AnyObject) {
         scheduleNotifications()
-
+        let alert = UIAlertController(title: "Deleted!",
+                                      message: "All pending notifications have been cancelled.",
+                                      preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "Ok",
+                                                        style: .default){
+                                                            UIAlertAction in
+        }
     }
+    @IBAction func pressedDeleteNotifications(_sender: AnyObject) {
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+    }
+    @IBAction func notificationStepperChanged (_sender: AnyObject){
+        notificationCountLabel.text = String(Int(notificationStepper.value))
+    }
+    
     
     func scheduleNotifications() {
         let userCalendar = Calendar.current
         let requestedComponent: Set<Calendar.Component> = [.month,.day,.hour,.minute,.second]
         let elapsed = endDatePicker.date.timeIntervalSince(startDatePicker.date)
         if Int(elapsed) > 0 {
-            let notificationInterval = Int(elapsed) / Int(notificationCountTextField.text!)!
+            let notificationInterval = Int(elapsed) / Int(notificationCountLabel.text!)!
             UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
-            for i in 0 ..< Int(notificationCountTextField.text!)! {
+            var notificationTimes = [Date]()
+            for i in 0 ..< Int(notificationCountLabel.text!)! {
                 let date = userCalendar.date(byAdding: .second, value: (notificationInterval * i), to: startDatePicker.date)
-                createNotification(firingTime: date!)
+//                createNotification(firingTime: date!)
+                notificationTimes.append(date!)
             }
             UNUserNotificationCenter.current().getPendingNotificationRequests { (notificationRequests) in
                 print("Requests: \(notificationRequests)")
             }
+            var notificationTimesToDisplay = [String]()
+            var i = 1
+            for time in notificationTimes {
+                notificationTimesToDisplay.append(String(i) + ":        " + formatter.string(from: time))
+                i += 1
+            }
+            let confirmationAlert = UIAlertController(title: "Notifications Scheduled!",
+                                                      message: "",
+                                                      preferredStyle: .alert)
+            let okAction = UIAlertAction(title: "OK",
+                                                          style: .default) {
+                                                            UIAlertAction in
+                                                            self.navigationController?.popViewController(animated: true)
+            }
+            confirmationAlert.addAction(okAction)
+            let alert = UIAlertController(title: "Notifications to be scheduled",
+                                          message: notificationTimesToDisplay.joined(separator: "\n"),
+                                          preferredStyle: .alert)
+            let scheduleNotificationsAction = UIAlertAction(title: "Schedule",
+                                                            style: .default){
+                                                                UIAlertAction in
+                                                                for i in 0 ..< Int(self.notificationCountLabel.text!)! {
+                                                                    let date = userCalendar.date(byAdding: .second, value: (notificationInterval * i), to: self.startDatePicker.date)
+                                                                    self.createNotification(firingTime: date!)
+                                                                }
+                                                                self.present(confirmationAlert, animated: true)
+            }
+
+            let cancelNotificationsAction = UIAlertAction(title: "Cancel",
+                                                          style: .default) {
+                                                            UIAlertAction in
+//                                                            UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+            }
+            alert.addAction(scheduleNotificationsAction)
+            alert.addAction(cancelNotificationsAction)
+            present(alert, animated: true)
         }
     }
     
@@ -65,6 +118,8 @@ class NotificationViewController: UIViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        notificationCountLabel.text = String(Int(notificationStepper.value))
+        self.formatter.dateFormat = "HH:mm"
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: "dismissKeyboard")
         view.addGestureRecognizer(tap)
     }

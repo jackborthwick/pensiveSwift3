@@ -96,17 +96,19 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     }
     
     func updateTextViewFromScroll () {
+        print ("updating")
         let indexPath = collectionView.indexPathForItem(at: getSliderCenter())
         if ((indexPath != nil) && (indexPath!.row <= days.count - 1)) {
             noteTextView.text = String(describing: days[(indexPath?.row)!].relationshipDayNote!.allObjects.count)
 
-            currentDay = days[(indexPath?.row)!]
+            self.currentDay = days[(indexPath?.row)!]
+            tableView.reloadData()
+//            print(self.currentDay)
             if days[(indexPath?.row)!].value(forKey: "weather") != nil {
                 noteTextView.text = days[(indexPath?.row)!].value(forKey: "weather") as! String
                 noteTextView.text = (noteTextView.text + "\n" + "Latitude:" + (days[(indexPath?.row)!].value(forKey: "latitude") as! String))
                 noteTextView.text = noteTextView.text + "\n" + "Longitude:" + (days[(indexPath?.row)!].value(forKey: "longitude") as! String)
                 noteTextView.text = noteTextView.text + "\n" + String(days[(indexPath?.row)!].relationshipDayNote!.count)
-                tableView.reloadData()
             }
         }
     }
@@ -180,7 +182,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             newNote.date = self.formatter.string(from: Date())
             currentDay.addToRelationshipDayNote(newNote)
             self.selectedNote = newNote
-
         }
         performSegue(withIdentifier: noteSegueIdentifier, sender: nil)
 
@@ -236,7 +237,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         note.date = self.formatter.string(from: date)
         note.note = noteString
         if !(checkDayExistence(date: Date())) {
-            
             let entityDescription =
                 NSEntityDescription.entity(forEntityName: "Day",
                                            in: managedObjectContext)!
@@ -277,11 +277,13 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         do {
             days = try managedObjectContext.fetch(Day.fetchRequest())
             if days.count > 0 {
-                currentDay = days[days.count - 1]
+                self.currentDay = days[days.count - 1]
+                
 
             }
             collectionView.reloadData()
-//            updateTextViewFromScroll()
+            updateTextViewFromScroll()
+            print ("fetched days")
             
         } catch let error as NSError {
             print("Could not fetch. \(error), \(error.userInfo)")
@@ -406,7 +408,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     func locationManager(_: CLLocationManager, didUpdateLocations: [CLLocation]){
         print ("LOCATION LOCATION LOCATION")
         print(didUpdateLocations[0].coordinate)
-
+        
         if currentDay.value(forKey: "longitude") == nil {
             guard let appDelegate =
                 UIApplication.shared.delegate as? AppDelegate else {
@@ -474,15 +476,20 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             locationManager.requestAlwaysAuthorization()
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            locationManager.startUpdatingLocation()
         }
         tableView.layoutMargins = UIEdgeInsets.zero
         tableView.separatorInset = UIEdgeInsets.zero
+        scrollToMostRecentDay() 
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        scrollToMostRecentDay()
+        self.fetchDays()
+        print ("appeared")
+//        updateTextViewFromScroll()
     }
+    
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
