@@ -24,7 +24,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VjZ-iy-Up8" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1441" y="96"/>
+            <point key="canvasLocation" x="-756" y="116"/>
         </scene>
         <!--View Controller-->
         <scene sceneID="SVB-QA-zZh">
@@ -136,11 +136,51 @@
                         <outlet property="collectionView" destination="3Xo-Bw-xIM" id="ulz-ma-RRx"/>
                         <outlet property="noteTextView" destination="fL4-Zf-ha3" id="dsT-sD-YHJ"/>
                         <outlet property="tableView" destination="hUq-io-L8E" id="W1t-Px-56n"/>
+                        <segue destination="Xh0-SX-jU0" kind="show" identifier="noteSegueID" id="6eS-Im-JOe"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="jpe-Vq-RND" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-578.39999999999998" y="50.824587706146929"/>
+            <point key="canvasLocation" x="-708" y="156"/>
+        </scene>
+        <!--Note View Controller-->
+        <scene sceneID="rtB-ul-wGy">
+            <objects>
+                <viewController id="Xh0-SX-jU0" customClass="NoteViewController" customModule="pensiveSwift3" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="U6a-cu-BYa"/>
+                        <viewControllerLayoutGuide type="bottom" id="hJA-x8-6Vg"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="X62-ml-P1A">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="L7w-DL-zLU">
+                                <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                <connections>
+                                    <outlet property="delegate" destination="Xh0-SX-jU0" id="y1r-Nz-d6D"/>
+                                </connections>
+                            </textView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="L7w-DL-zLU" firstAttribute="top" secondItem="U6a-cu-BYa" secondAttribute="bottom" id="CDg-EN-Uoe"/>
+                            <constraint firstAttribute="trailing" secondItem="L7w-DL-zLU" secondAttribute="trailing" id="Kh4-xk-TJM"/>
+                            <constraint firstItem="L7w-DL-zLU" firstAttribute="leading" secondItem="X62-ml-P1A" secondAttribute="leading" id="QN0-kr-3lN"/>
+                            <constraint firstItem="L7w-DL-zLU" firstAttribute="bottom" secondItem="hJA-x8-6Vg" secondAttribute="top" id="VhO-At-0Vh"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="textView" destination="L7w-DL-zLU" id="BRF-gd-4mt"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="av8-oq-llV" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="44" y="157.87106446776613"/>
         </scene>
         <!--Notification View Controller-->
         <scene sceneID="Rl7-yA-b5z">
@@ -234,7 +274,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tQV-AC-1wd" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="220" y="-188.45577211394306"/>
+            <point key="canvasLocation" x="-1484" y="155"/>
         </scene>
     </scenes>
 </document>

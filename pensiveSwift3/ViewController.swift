@@ -16,17 +16,25 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     @IBOutlet weak var tableView:               UITableView!
     @IBOutlet weak var collectionView:          UICollectionView!
     @IBOutlet weak var noteTextView:            UITextView!
-
+    
+    let noteSegueIdentifier = "noteSegueID"
     
     var days: [Day] = []
     var currentDay = Day()
+    var selectedNote = Note()
     let reuseIdentifierCollectionView = "CVCell"
     let formatter = DateFormatter()
     var lastOffsetCapture = TimeInterval.abs(0)
     var previousOffset = CGPoint.init(x:0, y:0)
     let locationManager = CLLocationManager()
 
-    
+    //MARK: Segue Methods
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == noteSegueIdentifier {
+            let noteVC = segue.destination as? NoteViewController
+            noteVC?.selectedNote = self.selectedNote
+        }
+    }
  
     
     //MARK: CollectionView/Slider Methods
@@ -38,11 +46,11 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         //Padding so all cells can reach the center of the screen
         if indexPath.row == 0 || indexPath.row == self.days.count + 1 {
-            var cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifierCollectionView, for: indexPath as     IndexPath) as! DayCollectionViewCell
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifierCollectionView, for: indexPath as     IndexPath) as! DayCollectionViewCell
             cell.dayDateLabel.text = ""
             return cell        }
         else if days.count != 0 {
-            var cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifierCollectionView, for: indexPath as     IndexPath) as! DayCollectionViewCell
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifierCollectionView, for: indexPath as     IndexPath) as! DayCollectionViewCell
             let day = days[indexPath.row - 1]
             cell.dayDateLabel.text = day.value(forKey: "date") as? String
             return cell
@@ -166,6 +174,16 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                 cell.textLabel?.text = "No days"
                 return cell
             }
+    }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        let descriptors = [NSSortDescriptor(key: "order", ascending: true)] as [NSSortDescriptor]
+        let notes = currentDay.relationshipDayNote?.sortedArray(using: descriptors) as! [Note]!
+        print(notes)
+        print(notes?.count)
+        print(indexPath.row)
+        self.selectedNote = (notes?[indexPath.row])!
+        performSegue(withIdentifier: noteSegueIdentifier, sender: nil)
     }
 //
     //MARK: Note CoreData Methods
