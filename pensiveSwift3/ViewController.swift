@@ -220,15 +220,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
 //
     //MARK: Note CoreData Methods
     
-    func saveDay(noteString: String, date: Date) {
-        guard let appDelegate =
-            UIApplication.shared.delegate as? AppDelegate else {
-                return
-        }
-        print ("setting note")
-
-        let managedObjectContext =
-            appDelegate.persistentContainer.viewContext
+    func createNote(managedObjectContext: NSManagedObjectContext, appDelegate: AppDelegate, noteString: String) -> Note{
         let date = Date()
         let entityDescription =
             NSEntityDescription.entity(forEntityName: "Note",
@@ -236,37 +228,34 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         let note = NSManagedObject(entity: entityDescription, insertInto: managedObjectContext) as! Note
         note.date = self.formatter.string(from: date)
         note.note = noteString
-        if !(checkDayExistence(date: Date())) {
-            let entityDescription =
-                NSEntityDescription.entity(forEntityName: "Day",
-                                           in: managedObjectContext)!
-            let day = NSManagedObject(entity: entityDescription, insertInto: managedObjectContext) as! Day
-            print (date)
-            day.setValue(self.formatter.string(from: date), forKey: "date")
-            note.relationshipNotesDay = day
-            note.order = 0
-            currentDay = day
-            locationManager.startUpdatingLocation()
-            do {
-                try managedObjectContext.save()
-                days.append(day)
-            } catch let error as NSError {
-                print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
-            }
-        }
-        else {
-            note.relationshipNotesDay = days[days.count - 1]
-            note.order = Int16((days[days.count - 1].relationshipDayNote?.count)!)
-            do {
-                try managedObjectContext.save()
-            } catch let error as NSError {
-                print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
-            }
-            fetchDays()
-            print ("day already exists")
+        return note
+    }
+    
+    func createDay(managedObjectContext: NSManagedObjectContext, appDelegate: AppDelegate, date: Date) -> Day {
+        let entityDescription =
+            NSEntityDescription.entity(forEntityName: "Day",
+                                       in: managedObjectContext)!
+        let day = NSManagedObject(entity: entityDescription, insertInto: managedObjectContext) as! Day
+        print (date)
+        day.setValue(self.formatter.string(from: date), forKey: "date")
+        return day
+    }
+    
+    func connectNoteToDay(note: Note, day: Day) {
+        note.relationshipNotesDay = day
+        note.order = Int16((day.relationshipDayNote?.count)!)
+    }
+    
+    func saveContext(managedObjectContext: NSManagedObjectContext) {
+        do {
+            try managedObjectContext.save()
+        } catch let error as NSError {
+            print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
+            presentUnknownErrorAlert()
         }
 
     }
+
     func fetchDays (){
         guard let appDelegate =
             UIApplication.shared.delegate as? AppDelegate else {
@@ -289,14 +278,8 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             print("Could not fetch. \(error), \(error.userInfo)")
         }
     }
-    func checkDayExistence(date: Date) -> Bool {
-        guard let appDelegate =
-            UIApplication.shared.delegate as? AppDelegate else {
-                return false
-        }
-        let managedObjectContext =
-            appDelegate.persistentContainer.viewContext
-        
+    
+    func checkDayExistence(managedObjectContext: NSManagedObjectContext, appDelegate: AppDelegate, date: Date) -> Bool {
         let fetchRequest =
             NSFetchRequest<NSManagedObject>(entityName: "Day")
         let predicate = NSPredicate(format: "date = %@", self.formatter.string(from: date))
@@ -319,6 +302,30 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
 
     }
     
+    func saveAction(noteString: String, date: Date) {
+        guard let appDelegate =
+            UIApplication.shared.delegate as? AppDelegate else {
+                return
+        }
+        let managedObjectContext =
+            appDelegate.persistentContainer.viewContext
+        let note = self.createNote(managedObjectContext: managedObjectContext, appDelegate: appDelegate, noteString: noteString)
+        if !(checkDayExistence(managedObjectContext: managedObjectContext, appDelegate: appDelegate, date: Date())) {//Create day and note
+            let day = createDay(managedObjectContext: managedObjectContext, appDelegate: appDelegate, date: date)
+            self.connectNoteToDay(note: note, day: day)
+            currentDay = day
+            locationManager.startUpdatingLocation()
+            saveContext(managedObjectContext: managedObjectContext)
+            days.append(day)
+        }
+        else {//Add note to existing day
+            connectNoteToDay(note: note, day: days[days.count - 1])
+            saveContext(managedObjectContext: managedObjectContext)
+            fetchDays()
+            print ("day already exists")
+        }
+        
+    }
     //MARK: Local Notification Delegate Methods
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.alert, .sound, .badge])
@@ -329,7 +336,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         let identifier = response.actionIdentifier
         let textResponse = response as? UNTextInputNotificationResponse
         if (textResponse?.userText) != nil {
-            self.saveDay(noteString: (textResponse?.userText)!, date: Date())
+            self.saveAction(noteString: (textResponse?.userText)!, date: Date())
             //            self.tableView.reloadData()
             self.collectionView.reloadData()
             self.updateTextViewFromScroll()
@@ -384,7 +391,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                     return
             }
             
-            self.saveDay(noteString: noteToSave, date: Date())
+            self.saveAction(noteString: noteToSave, date: Date())
 //            self.tableView.reloadData()
             self.collectionView.reloadData()
         }
@@ -451,6 +458,15 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             }
         }
         return ["suck"]
+    }
+    func presentUnknownErrorAlert() {
+        let alert = UIAlertController(title: "An Unkown Error Occurred",
+                                      message: "Sorry for the inconvenience.",
+                                      preferredStyle: .alert)
+        
+        let okAction = UIAlertAction(title: "Ok", style: .default)
+        alert.addAction(okAction)
+        present(alert,animated: true)
     }
     
     //MARK: Lifecycle Methods
