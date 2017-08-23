@@ -48,7 +48,7 @@ class DataController {
         note.order = Int16((day.relationshipDayNote?.count)!)
     }
     
-    func saveContext(managedObjectContext: NSManagedObjectContext) {
+    func saveContext() {
         do {
             try managedObjectContext.save()
         } catch let error as NSError {
@@ -63,8 +63,9 @@ class DataController {
             days = try managedObjectContext.fetch(Day.fetchRequest())
             if days.count > 0 {
                 self.currentDay = days[days.count - 1]
-                
-                
+            }
+            else {
+                addOnboardingDay()
             }
 
             print ("fetched days")
@@ -97,21 +98,32 @@ class DataController {
         
     }
     
-    func saveAction(noteString: String, date: Date) {
+    func addOnboardingDay() {
+        let calendar = Calendar.current
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: Date())
+        let onboardingDay = createDay(date: yesterday!)
+        let note = createNote(noteString: "Hiya, this your first time here?")
+        onboardingDay.addToRelationshipDayNote(note)
+        saveContext()
+    }
+    
+    func saveAction(noteString: String, date: Date) -> Bool {
         let note = self.createNote(noteString: noteString)
         if !(checkDayExistence(date: Date())) {//Create day and note
             let day = createDay(date: date)
             self.connectNoteToDay(note: note, day: day)
             currentDay = day
 //            locationManager.startUpdatingLocation()
-            saveContext(managedObjectContext: managedObjectContext)
+            saveContext()
             days.append(day)
+            return true
         }
         else {//Add note to existing day
             connectNoteToDay(note: note, day: days[days.count - 1])
-            saveContext(managedObjectContext: managedObjectContext)
+            saveContext()
             fetchDays()
             print ("day already exists")
+            return false
         }
         
     }

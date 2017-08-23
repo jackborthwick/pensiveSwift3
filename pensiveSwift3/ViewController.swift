@@ -18,8 +18,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     let noteSegueIdentifier = "noteSegueID"
     
-//    var days: [Day] = []
-//    var currentDay = Day()
+
     var selectedNote = Note()
     let reuseIdentifierCollectionView = "CVCell"
     let formatter = DateFormatter()
@@ -134,7 +133,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     func tableView(_ tableView: UITableView,
                    numberOfRowsInSection section: Int) -> Int {
         if self.dataController.days.count > 0 {
-            return ((self.dataController.currentDay.relationshipDayNote?.count)! + 1)
+            return ((self.dataController.currentDay.relationshipDayNote?.count ?? 0) + 1)
         }
         return 1
     }
@@ -142,7 +141,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     func tableView(_ tableView: UITableView,
                    cellForRowAt indexPath: IndexPath)
         -> UITableViewCell {
-            if self.dataController.days.count != 0 {
+            if self.dataController.days.count > 0 {
                 if indexPath.row == (self.dataController.currentDay.relationshipDayNote?.count) {
                     let cell =
                         tableView.dequeueReusableCell(withIdentifier: "Cell",
@@ -157,8 +156,8 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                     tableView.dequeueReusableCell(withIdentifier: "Cell",
                                               for: indexPath)
                 cell.layoutMargins = UIEdgeInsets.zero
-                cell.textLabel?.text = String(describing: (notes?[indexPath.row] as! Note).note)
-                cell.textLabel?.text = (cell.textLabel?.text)! + String(describing:(notes?[indexPath.row] as! Note).date)
+                cell.textLabel?.text = String(describing: (notes?[indexPath.row] as! Note).note!)
+                cell.textLabel?.text = (cell.textLabel?.text)! + String(describing:(notes?[indexPath.row] as! Note).date!)
                 return cell
             }
             else {
@@ -230,7 +229,9 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         let identifier = response.actionIdentifier
         let textResponse = response as? UNTextInputNotificationResponse
         if (textResponse?.userText) != nil {
-            self.dataController.saveAction(noteString: (textResponse?.userText)!, date: Date())
+            if self.dataController.saveAction(noteString: (textResponse?.userText)!, date: Date()) {//if it'sa new day
+                locationManager.startUpdatingLocation()
+            }
             self.collectionView.reloadData()
             self.updateTextViewFromScroll()
             print("Tapped in notification")

@@ -75,7 +75,7 @@ class NotificationViewController: UIViewController {
                                                                 UIAlertAction in
                                                                 for i in 0 ..< Int(self.notificationCountLabel.text!)! {
                                                                     let date = userCalendar.date(byAdding: .second, value: (notificationInterval * i), to: self.startDatePicker.date)
-                                                                    self.createNotification(firingTime: date!)
+                                                                    self.createNotification(firingTime: date!, notifID: String(i))
                                                                 }
                                                                 self.present(confirmationAlert, animated: true)
             }
@@ -91,7 +91,7 @@ class NotificationViewController: UIViewController {
         }
     }
     
-    func createNotification(firingTime: Date) {
+    func createNotification(firingTime: Date, notifID: String) {
         if #available(iOS 10.0, *) {
             //            let commentAction = UNTextInputNotificationAction(identifier: "notificationId", title: "What's on your mind?", options: [], textInputButtonTitle: "Add", textInputPlaceholder: "")
             let content = UNMutableNotificationContent()
@@ -101,7 +101,7 @@ class NotificationViewController: UIViewController {
             content.badge = 1
             let dateCompenents = Calendar.current.dateComponents([.hour, .minute, .second], from: firingTime)
             let trigger = UNCalendarNotificationTrigger(dateMatching: dateCompenents, repeats: true)
-            let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+            let request = UNNotificationRequest(identifier: notifID, content: content, trigger: trigger)
             UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
             print("added")
         }
