@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import CoreData
 import UserNotifications
 import CoreLocation
 //class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
@@ -20,7 +19,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     let noteSegueIdentifier = "noteSegueID"
     
 //    var days: [Day] = []
-    var currentDay = Day()
+//    var currentDay = Day()
     var selectedNote = Note()
     let reuseIdentifierCollectionView = "CVCell"
     let formatter = DateFormatter()
@@ -111,7 +110,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         if ((indexPath != nil) && (indexPath!.row <= self.dataController.days.count - 1)) {
             noteTextView.text = String(describing: self.dataController.days[(indexPath?.row)!].relationshipDayNote!.allObjects.count)
 
-            self.currentDay = self.dataController.days[(indexPath?.row)!]
+            self.dataController.currentDay = self.dataController.days[(indexPath?.row)!]
             tableView.reloadData()
 //            print(self.currentDay)
             if self.dataController.days[(indexPath?.row)!].value(forKey: "weather") != nil {
@@ -135,7 +134,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     func tableView(_ tableView: UITableView,
                    numberOfRowsInSection section: Int) -> Int {
         if self.dataController.days.count > 0 {
-            return ((self.currentDay.relationshipDayNote?.count)! + 1) ?? 0
+            return ((self.dataController.currentDay.relationshipDayNote?.count)! + 1)
         }
         return 1
     }
@@ -144,7 +143,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                    cellForRowAt indexPath: IndexPath)
         -> UITableViewCell {
             if self.dataController.days.count != 0 {
-                if indexPath.row == (self.currentDay.relationshipDayNote?.count) {
+                if indexPath.row == (self.dataController.currentDay.relationshipDayNote?.count) {
                     let cell =
                         tableView.dequeueReusableCell(withIdentifier: "Cell",
                                                       for: indexPath)
@@ -153,7 +152,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                     return cell
                 }
                 let descriptors = [NSSortDescriptor(key: "order", ascending: true)] as [NSSortDescriptor]
-                let notes = currentDay.relationshipDayNote?.sortedArray(using: descriptors) as NSArray!
+                let notes = self.dataController.currentDay.relationshipDayNote?.sortedArray(using: descriptors) as NSArray!
                 let cell =
                     tableView.dequeueReusableCell(withIdentifier: "Cell",
                                               for: indexPath)
@@ -173,7 +172,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         let descriptors = [NSSortDescriptor(key: "order", ascending: true)] as [NSSortDescriptor]
-        let notes = currentDay.relationshipDayNote?.sortedArray(using: descriptors) as! [Note]!
+        let notes = self.dataController.currentDay.relationshipDayNote?.sortedArray(using: descriptors) as! [Note]!
         if indexPath.row != notes?.count {
             self.selectedNote = (notes?[indexPath.row])!
         }
@@ -184,13 +183,8 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             }
             let managedObjectContext =
                 appDelegate.persistentContainer.viewContext
-            let entityDescription =
-                NSEntityDescription.entity(forEntityName: "Note",
-                                           in: managedObjectContext)!
-            let newNote = NSManagedObject(entity: entityDescription, insertInto: managedObjectContext) as! Note
-            newNote.order = Int16((currentDay.relationshipDayNote?.count)!)
-            newNote.date = self.formatter.string(from: Date())
-            currentDay.addToRelationshipDayNote(newNote)
+            let newNote = self.dataController.createNote(noteString: "")
+            self.dataController.connectNoteToDay(note: newNote, day: self.dataController.currentDay)
             self.selectedNote = newNote
         }
         performSegue(withIdentifier: noteSegueIdentifier, sender: nil)
@@ -198,7 +192,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     }
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         let descriptors = [NSSortDescriptor(key: "order", ascending: true)] as [NSSortDescriptor]
-        let notes = currentDay.relationshipDayNote?.sortedArray(using: descriptors) as! [Note]!
+        let notes = self.dataController.currentDay.relationshipDayNote?.sortedArray(using: descriptors) as! [Note]!
         if indexPath.row != notes?.count {
             return true
         }
@@ -208,7 +202,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if (editingStyle == UITableViewCellEditingStyle.delete) {
             let descriptors = [NSSortDescriptor(key: "order", ascending: true)] as [NSSortDescriptor]
-            let notes = currentDay.relationshipDayNote?.sortedArray(using: descriptors) as! [Note]!
+            let notes = self.dataController.currentDay.relationshipDayNote?.sortedArray(using: descriptors) as! [Note]!
             guard let appDelegate =
                 UIApplication.shared.delegate as? AppDelegate else {
                     return
@@ -224,7 +218,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                 print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
             }
             updateTextViewFromScroll()
-            // handle delete (by removing the data from your array and updating the tableview)
         }
     }
        //MARK: Local Notification Delegate Methods
@@ -238,7 +231,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         let textResponse = response as? UNTextInputNotificationResponse
         if (textResponse?.userText) != nil {
             self.dataController.saveAction(noteString: (textResponse?.userText)!, date: Date())
-            //            self.tableView.reloadData()
             self.collectionView.reloadData()
             self.updateTextViewFromScroll()
             print("Tapped in notification")
@@ -259,7 +251,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
 
     func createNotification(firingTime: String) {
         if #available(iOS 10.0, *) {
-//            let commentAction = UNTextInputNotificationAction(identifier: "notificationId", title: "What's on your mind?", options: [], textInputButtonTitle: "Add", textInputPlaceholder: "")
             let content = UNMutableNotificationContent()
             content.title = "Hey?"
             content.body = "What's on your mind?"
@@ -293,13 +284,11 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             }
             
             self.dataController.saveAction(noteString: noteToSave, date: Date())
-//            self.tableView.reloadData()
             self.collectionView.reloadData()
+            self.updateTextViewFromScroll()
         }
-        
         let cancelAction = UIAlertAction(title: "Cancel",
                                          style: .default)
-        
         alert.addTextField()
         
         alert.addAction(saveAction)
@@ -308,7 +297,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         present(alert, animated: true)
     }
     @IBAction func scheduleTestNotification(_sender: AnyObject) {
-        print ("pressed make notification")
         createNotification(firingTime: "")
     }
 
@@ -317,25 +305,24 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         print ("LOCATION LOCATION LOCATION")
         print(didUpdateLocations[0].coordinate)
         
-        if currentDay.value(forKey: "longitude") == nil {
+        if self.dataController.currentDay.value(forKey: "longitude") == nil {
             guard let appDelegate =
                 UIApplication.shared.delegate as? AppDelegate else {
                     return
             }
             let managedObjectContext =
                 appDelegate.persistentContainer.viewContext
-            currentDay.setValue(String(format: "%f", didUpdateLocations[0].coordinate.longitude), forKey: "longitude")
-            currentDay.setValue(String(format: "%f", didUpdateLocations[0].coordinate.latitude), forKey: "latitude")
-            currentDay.setValue(getWeather(lat: String(format: "%f", didUpdateLocations[0].coordinate.latitude), lon: String(format: "%f", didUpdateLocations[0].coordinate.longitude))[0] as! String, forKey: "weather")
+            self.dataController.currentDay.setValue(String(format: "%f", didUpdateLocations[0].coordinate.longitude), forKey: "longitude")
+            self.dataController.currentDay.setValue(String(format: "%f", didUpdateLocations[0].coordinate.latitude), forKey: "latitude")
+            self.dataController.currentDay.setValue(getWeather(lat: String(format: "%f", didUpdateLocations[0].coordinate.latitude), lon: String(format: "%f", didUpdateLocations[0].coordinate.longitude))[0] as! String, forKey: "weather")
             do {
                 try managedObjectContext.save()
                 self.dataController.fetchDays()
                 collectionView.reloadData()
                 updateTextViewFromScroll()
-//                days.append(day)
             } catch let error as NSError {
                 print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
-            }//            getWeather(String(didUpdateLocations[0].coordinate.latitude), lon: String(didUpdateLocations[0].coordinate.longitude))
+            }
         }
         locationManager.stopUpdatingLocation()
     }
@@ -376,13 +363,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//        guard let appDelegate =
-//            UIApplication.shared.delegate as? AppDelegate else {
-//                return
-//        }
-//        let managedObjectContext =
-//            appDelegate.persistentContainer.viewContext
-//        self.dataController = DataController(managedObjectContext: managedObjectContext, appDelegate: appDelegate)
         collectionView.reloadData()
         updateTextViewFromScroll()
         self.formatter.dateFormat = "dd.MM.yyyy"
@@ -416,7 +396,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         collectionView.reloadData()
         updateTextViewFromScroll()
         print ("appeared")
-//        updateTextViewFromScroll()
     }
     
     

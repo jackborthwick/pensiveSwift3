@@ -22,7 +22,7 @@ class DataController {
         self.formatter.dateFormat = "dd.MM.yyyy"
         self.fetchDays()
     }
-    func createNote(managedObjectContext: NSManagedObjectContext, appDelegate: AppDelegate, noteString: String) -> Note{
+    func createNote(noteString: String) -> Note{
         let date = Date()
         let entityDescription =
             NSEntityDescription.entity(forEntityName: "Note",
@@ -33,7 +33,7 @@ class DataController {
         return note
     }
     
-    func createDay(managedObjectContext: NSManagedObjectContext, appDelegate: AppDelegate, date: Date) -> Day {
+    func createDay(date: Date) -> Day {
         let entityDescription =
             NSEntityDescription.entity(forEntityName: "Day",
                                        in: managedObjectContext)!
@@ -74,7 +74,7 @@ class DataController {
         }
     }
     
-    func checkDayExistence(managedObjectContext: NSManagedObjectContext, appDelegate: AppDelegate, date: Date) -> Bool {
+    func checkDayExistence(date: Date) -> Bool {
         let fetchRequest =
             NSFetchRequest<NSManagedObject>(entityName: "Day")
         let predicate = NSPredicate(format: "date = %@", self.formatter.string(from: date))
@@ -98,9 +98,9 @@ class DataController {
     }
     
     func saveAction(noteString: String, date: Date) {
-        let note = self.createNote(managedObjectContext: managedObjectContext, appDelegate: appDelegate, noteString: noteString)
-        if !(checkDayExistence(managedObjectContext: managedObjectContext, appDelegate: appDelegate, date: Date())) {//Create day and note
-            let day = createDay(managedObjectContext: managedObjectContext, appDelegate: appDelegate, date: date)
+        let note = self.createNote(noteString: noteString)
+        if !(checkDayExistence(date: Date())) {//Create day and note
+            let day = createDay(date: date)
             self.connectNoteToDay(note: note, day: day)
             currentDay = day
 //            locationManager.startUpdatingLocation()
