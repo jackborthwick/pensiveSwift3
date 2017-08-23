@@ -19,7 +19,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     let noteSegueIdentifier = "noteSegueID"
     
-    var days: [Day] = []
+//    var days: [Day] = []
     var currentDay = Day()
     var selectedNote = Note()
     let reuseIdentifierCollectionView = "CVCell"
@@ -27,6 +27,16 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     var lastOffsetCapture = TimeInterval.abs(0)
     var previousOffset = CGPoint.init(x:0, y:0)
     let locationManager = CLLocationManager()
+    lazy var dataController :DataController = self.initializeDataController()
+    
+    func initializeDataController() -> DataController {
+        let appDelegate =
+            UIApplication.shared.delegate as! AppDelegate
+        let managedObjectContext =
+            appDelegate.persistentContainer.viewContext
+        var dataController = DataController(managedObjectContext: managedObjectContext, appDelegate: appDelegate)
+        return dataController
+    }
 
     //MARK: Segue Methods
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -40,18 +50,18 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     //MARK: CollectionView/Slider Methods
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return self.days.count + 2
+        return self.dataController.days.count + 2
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         //Padding so all cells can reach the center of the screen
-        if indexPath.row == 0 || indexPath.row == self.days.count + 1 {
+        if indexPath.row == 0 || indexPath.row == self.dataController.days.count + 1 {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifierCollectionView, for: indexPath as     IndexPath) as! DayCollectionViewCell
             cell.dayDateLabel.text = ""
             return cell        }
-        else if days.count != 0 {
+        else if self.dataController.days.count != 0 {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifierCollectionView, for: indexPath as     IndexPath) as! DayCollectionViewCell
-            let day = days[indexPath.row - 1]
+            let day = self.dataController.days[indexPath.row - 1]
             cell.dayDateLabel.text = day.value(forKey: "date") as? String
             return cell
 
@@ -98,23 +108,23 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     func updateTextViewFromScroll () {
         print ("updating")
         let indexPath = collectionView.indexPathForItem(at: getSliderCenter())
-        if ((indexPath != nil) && (indexPath!.row <= days.count - 1)) {
-            noteTextView.text = String(describing: days[(indexPath?.row)!].relationshipDayNote!.allObjects.count)
+        if ((indexPath != nil) && (indexPath!.row <= self.dataController.days.count - 1)) {
+            noteTextView.text = String(describing: self.dataController.days[(indexPath?.row)!].relationshipDayNote!.allObjects.count)
 
-            self.currentDay = days[(indexPath?.row)!]
+            self.currentDay = self.dataController.days[(indexPath?.row)!]
             tableView.reloadData()
 //            print(self.currentDay)
-            if days[(indexPath?.row)!].value(forKey: "weather") != nil {
-                noteTextView.text = days[(indexPath?.row)!].value(forKey: "weather") as! String
-                noteTextView.text = (noteTextView.text + "\n" + "Latitude:" + (days[(indexPath?.row)!].value(forKey: "latitude") as! String))
-                noteTextView.text = noteTextView.text + "\n" + "Longitude:" + (days[(indexPath?.row)!].value(forKey: "longitude") as! String)
-                noteTextView.text = noteTextView.text + "\n" + String(days[(indexPath?.row)!].relationshipDayNote!.count)
+            if self.dataController.days[(indexPath?.row)!].value(forKey: "weather") != nil {
+                noteTextView.text = self.dataController.days[(indexPath?.row)!].value(forKey: "weather") as! String
+                noteTextView.text = (noteTextView.text + "\n" + "Latitude:" + (self.dataController.days[(indexPath?.row)!].value(forKey: "latitude") as! String))
+                noteTextView.text = noteTextView.text + "\n" + "Longitude:" + (self.dataController.days[(indexPath?.row)!].value(forKey: "longitude") as! String)
+                noteTextView.text = noteTextView.text + "\n" + String(self.dataController.days[(indexPath?.row)!].relationshipDayNote!.count)
             }
         }
     }
     
     func scrollToMostRecentDay() {
-        let indexPath = NSIndexPath(item: days.count, section: 0) // 1
+        let indexPath = NSIndexPath(item: self.dataController.days.count, section: 0) // 1
         self.collectionView.scrollToItem(at: indexPath as IndexPath, at: UICollectionViewScrollPosition.left, animated: true)
         updateTextViewFromScroll()
     }
@@ -124,7 +134,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
 //    
     func tableView(_ tableView: UITableView,
                    numberOfRowsInSection section: Int) -> Int {
-        if days.count > 0 {
+        if self.dataController.days.count > 0 {
             return ((self.currentDay.relationshipDayNote?.count)! + 1) ?? 0
         }
         return 1
@@ -133,7 +143,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     func tableView(_ tableView: UITableView,
                    cellForRowAt indexPath: IndexPath)
         -> UITableViewCell {
-            if days.count != 0 {
+            if self.dataController.days.count != 0 {
                 if indexPath.row == (self.currentDay.relationshipDayNote?.count) {
                     let cell =
                         tableView.dequeueReusableCell(withIdentifier: "Cell",
@@ -217,116 +227,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             // handle delete (by removing the data from your array and updating the tableview)
         }
     }
-//
-    //MARK: Note CoreData Methods
-    
-    func createNote(managedObjectContext: NSManagedObjectContext, appDelegate: AppDelegate, noteString: String) -> Note{
-        let date = Date()
-        let entityDescription =
-            NSEntityDescription.entity(forEntityName: "Note",
-                                       in: managedObjectContext)!
-        let note = NSManagedObject(entity: entityDescription, insertInto: managedObjectContext) as! Note
-        note.date = self.formatter.string(from: date)
-        note.note = noteString
-        return note
-    }
-    
-    func createDay(managedObjectContext: NSManagedObjectContext, appDelegate: AppDelegate, date: Date) -> Day {
-        let entityDescription =
-            NSEntityDescription.entity(forEntityName: "Day",
-                                       in: managedObjectContext)!
-        let day = NSManagedObject(entity: entityDescription, insertInto: managedObjectContext) as! Day
-        print (date)
-        day.setValue(self.formatter.string(from: date), forKey: "date")
-        return day
-    }
-    
-    func connectNoteToDay(note: Note, day: Day) {
-        note.relationshipNotesDay = day
-        note.order = Int16((day.relationshipDayNote?.count)!)
-    }
-    
-    func saveContext(managedObjectContext: NSManagedObjectContext) {
-        do {
-            try managedObjectContext.save()
-        } catch let error as NSError {
-            print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
-            presentUnknownErrorAlert()
-        }
-
-    }
-
-    func fetchDays (){
-        guard let appDelegate =
-            UIApplication.shared.delegate as? AppDelegate else {
-                return
-        }
-        let managedObjectContext =
-            appDelegate.persistentContainer.viewContext
-        do {
-            days = try managedObjectContext.fetch(Day.fetchRequest())
-            if days.count > 0 {
-                self.currentDay = days[days.count - 1]
-                
-
-            }
-            collectionView.reloadData()
-            updateTextViewFromScroll()
-            print ("fetched days")
-            
-        } catch let error as NSError {
-            print("Could not fetch. \(error), \(error.userInfo)")
-        }
-    }
-    
-    func checkDayExistence(managedObjectContext: NSManagedObjectContext, appDelegate: AppDelegate, date: Date) -> Bool {
-        let fetchRequest =
-            NSFetchRequest<NSManagedObject>(entityName: "Day")
-        let predicate = NSPredicate(format: "date = %@", self.formatter.string(from: date))
-        fetchRequest.predicate = predicate
-        do {
-            let fetchResults = try managedObjectContext.fetch(fetchRequest) as? [Day]
-            if fetchResults!.count > 0 {
-                print ("already have that day")
-                return true
-            }
-            else {
-                return false
-            }
-        }
-        catch let error as NSError {
-            print("Could not fetch. \(error), \(error.userInfo)")
-            return true
-            
-        }
-
-    }
-    
-    func saveAction(noteString: String, date: Date) {
-        guard let appDelegate =
-            UIApplication.shared.delegate as? AppDelegate else {
-                return
-        }
-        let managedObjectContext =
-            appDelegate.persistentContainer.viewContext
-        let note = self.createNote(managedObjectContext: managedObjectContext, appDelegate: appDelegate, noteString: noteString)
-        if !(checkDayExistence(managedObjectContext: managedObjectContext, appDelegate: appDelegate, date: Date())) {//Create day and note
-            let day = createDay(managedObjectContext: managedObjectContext, appDelegate: appDelegate, date: date)
-            self.connectNoteToDay(note: note, day: day)
-            currentDay = day
-            locationManager.startUpdatingLocation()
-            saveContext(managedObjectContext: managedObjectContext)
-            days.append(day)
-        }
-        else {//Add note to existing day
-            connectNoteToDay(note: note, day: days[days.count - 1])
-            saveContext(managedObjectContext: managedObjectContext)
-            fetchDays()
-            print ("day already exists")
-        }
-        
-    }
-    //MARK: Local Notification Delegate Methods
+       //MARK: Local Notification Delegate Methods
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.alert, .sound, .badge])
         
@@ -336,7 +237,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         let identifier = response.actionIdentifier
         let textResponse = response as? UNTextInputNotificationResponse
         if (textResponse?.userText) != nil {
-            self.saveAction(noteString: (textResponse?.userText)!, date: Date())
+            self.dataController.saveAction(noteString: (textResponse?.userText)!, date: Date())
             //            self.tableView.reloadData()
             self.collectionView.reloadData()
             self.updateTextViewFromScroll()
@@ -391,7 +292,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                     return
             }
             
-            self.saveAction(noteString: noteToSave, date: Date())
+            self.dataController.saveAction(noteString: noteToSave, date: Date())
 //            self.tableView.reloadData()
             self.collectionView.reloadData()
         }
@@ -428,7 +329,9 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             currentDay.setValue(getWeather(lat: String(format: "%f", didUpdateLocations[0].coordinate.latitude), lon: String(format: "%f", didUpdateLocations[0].coordinate.longitude))[0] as! String, forKey: "weather")
             do {
                 try managedObjectContext.save()
-                fetchDays()
+                self.dataController.fetchDays()
+                collectionView.reloadData()
+                updateTextViewFromScroll()
 //                days.append(day)
             } catch let error as NSError {
                 print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
@@ -473,7 +376,15 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.fetchDays()
+//        guard let appDelegate =
+//            UIApplication.shared.delegate as? AppDelegate else {
+//                return
+//        }
+//        let managedObjectContext =
+//            appDelegate.persistentContainer.viewContext
+//        self.dataController = DataController(managedObjectContext: managedObjectContext, appDelegate: appDelegate)
+        collectionView.reloadData()
+        updateTextViewFromScroll()
         self.formatter.dateFormat = "dd.MM.yyyy"
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound,.badge], completionHandler: {didAllow,Error in })
         UNUserNotificationCenter.current().delegate = self
@@ -501,7 +412,9 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.fetchDays()
+        self.dataController.fetchDays()
+        collectionView.reloadData()
+        updateTextViewFromScroll()
         print ("appeared")
 //        updateTextViewFromScroll()
     }
