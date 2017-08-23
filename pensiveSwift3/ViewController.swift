@@ -230,6 +230,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         let textResponse = response as? UNTextInputNotificationResponse
         if (textResponse?.userText) != nil {
             if self.dataController.saveAction(noteString: (textResponse?.userText)!, date: Date()) {//if it'sa new day
+                self.dataController.fetchDays()
                 locationManager.startUpdatingLocation()
             }
             self.collectionView.reloadData()
@@ -306,16 +307,16 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         print ("LOCATION LOCATION LOCATION")
         print(didUpdateLocations[0].coordinate)
         
-        if self.dataController.currentDay.value(forKey: "longitude") == nil {
+        if self.dataController.days[self.dataController.days.count - 1].value(forKey: "longitude") == nil {
             guard let appDelegate =
                 UIApplication.shared.delegate as? AppDelegate else {
                     return
             }
             let managedObjectContext =
                 appDelegate.persistentContainer.viewContext
-            self.dataController.currentDay.setValue(String(format: "%f", didUpdateLocations[0].coordinate.longitude), forKey: "longitude")
-            self.dataController.currentDay.setValue(String(format: "%f", didUpdateLocations[0].coordinate.latitude), forKey: "latitude")
-            self.dataController.currentDay.setValue(getWeather(lat: String(format: "%f", didUpdateLocations[0].coordinate.latitude), lon: String(format: "%f", didUpdateLocations[0].coordinate.longitude))[0] as! String, forKey: "weather")
+            self.dataController.days[self.dataController.days.count - 1].setValue(String(format: "%f", didUpdateLocations[0].coordinate.longitude), forKey: "longitude")
+            self.dataController.days[self.dataController.days.count - 1].setValue(String(format: "%f", didUpdateLocations[0].coordinate.latitude), forKey: "latitude")
+            self.dataController.days[self.dataController.days.count - 1].setValue(getWeather(lat: String(format: "%f", didUpdateLocations[0].coordinate.latitude), lon: String(format: "%f", didUpdateLocations[0].coordinate.longitude))[0] , forKey: "weather")
             do {
                 try managedObjectContext.save()
                 self.dataController.fetchDays()
@@ -380,21 +381,21 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         UNUserNotificationCenter.current().setNotificationCategories([category])
         if (CLLocationManager.locationServicesEnabled()) {
             print ("LOCATION SERVICES ENABLED")
-            locationManager.requestWhenInUseAuthorization()
+//            locationManager.requestWhenInUseAuthorization()
             locationManager.requestAlwaysAuthorization()
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-            locationManager.startUpdatingLocation()
+//            locationManager.startUpdatingLocation()
         }
         tableView.layoutMargins = UIEdgeInsets.zero
         tableView.separatorInset = UIEdgeInsets.zero
-        scrollToMostRecentDay() 
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.dataController.fetchDays()
         collectionView.reloadData()
+        scrollToMostRecentDay()
         updateTextViewFromScroll()
         print ("appeared")
     }
