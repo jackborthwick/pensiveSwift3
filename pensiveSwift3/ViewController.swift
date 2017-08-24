@@ -32,7 +32,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             UIApplication.shared.delegate as! AppDelegate
         let managedObjectContext =
             appDelegate.persistentContainer.viewContext
-        var dataController = DataController(managedObjectContext: managedObjectContext, appDelegate: appDelegate)
+        let dataController = DataController(managedObjectContext: managedObjectContext, appDelegate: appDelegate)
         return dataController
     }
     
@@ -124,6 +124,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
 
             self.dataController.currentDay = self.dataController.days[(indexPath?.row)!]
             tableView.reloadData()
+
 //            print(self.currentDay)
             if self.dataController.days[(indexPath?.row)!].value(forKey: "weather") != nil {
                 noteTextView.text = self.dataController.days[(indexPath?.row)!].value(forKey: "weather") as! String
@@ -375,15 +376,31 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     }
     func catchNotification(notification:Notification) -> Void {
         print("Catch notification")
-        
-        if self.dataController.appDelegate.makeNewNote {
-            let newNote = self.dataController.createNote(noteString: "")
-            self.dataController.connectNoteToDay(note: newNote, day: self.dataController.days)
-            self.selectedNote = newNote
-            performSegue(withIdentifier: noteSegueIdentifier, sender: nil)
+        print(UIApplication.topViewController())
+        if (UIApplication.topViewController() is NoteViewController ) {
+            print ("IT IS IT IS")
             self.dataController.appDelegate.makeNewNote = false
-
+            let noteVC = UIApplication.topViewController() as! NoteViewController
+            if noteVC.textView.text == "" || noteVC.textView.text == nil {
+                dataController.managedObjectContext.delete(noteVC.selectedNote)
+            }
+            let newNote = self.dataController.createNote(noteString: "")
+            self.dataController.connectNoteToDay(note: newNote, day: self.dataController.days[self.dataController.days.count - 1])
+            noteVC.selectedNote = newNote
+            noteVC.textView.text = newNote.note
         }
+        else {
+            if self.dataController.appDelegate.makeNewNote {
+                let newNote = self.dataController.createNote(noteString: "")
+                self.dataController.connectNoteToDay(note: newNote, day: self.dataController.days[self.dataController.days.count - 1])
+                self.selectedNote = newNote
+                performSegue(withIdentifier: noteSegueIdentifier, sender: nil)
+                self.dataController.appDelegate.makeNewNote = false
+            }
+        }
+
+
+
         
     }
     //MARK: Lifecycle Methods
@@ -453,5 +470,22 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     }
 
 
+}
+
+extension UIApplication {
+    class func topViewController(controller: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
+        if let navigationController = controller as? UINavigationController {
+            return topViewController(controller: navigationController.visibleViewController)
+        }
+        if let tabController = controller as? UITabBarController {
+            if let selected = tabController.selectedViewController {
+                return topViewController(controller: selected)
+            }
+        }
+        if let presented = controller?.presentedViewController {
+            return topViewController(controller: presented)
+        }
+        return controller
+    }
 }
 

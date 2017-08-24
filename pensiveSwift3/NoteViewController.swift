@@ -16,27 +16,40 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) { //Handle the text changes here
         selectedNote.note = textView.text
     }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+//        let vc = self.presentingViewController as! ViewController
+//        vc.dataController.appDelegate.makeNewNote = false
         textView.text = selectedNote.note
         textView.delegate = self
         textView.becomeFirstResponder()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+            print("appearing")
+    }
+    
+
     
     override func viewWillDisappear(_ animated: Bool) {
         guard let appDelegate =
             UIApplication.shared.delegate as? AppDelegate else {
                 return
         }
+
         let managedObjectContext =
             appDelegate.persistentContainer.viewContext
-        if selectedNote.note == nil {
+        if selectedNote.note == nil || selectedNote.note == "" {
             managedObjectContext.delete(selectedNote)
             print ("deleted")
         }
         do {
             try managedObjectContext.save()
-            
         } catch let error as NSError {
             print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
         }
