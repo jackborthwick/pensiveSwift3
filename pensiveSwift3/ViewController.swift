@@ -10,7 +10,7 @@ import UIKit
 import UserNotifications
 import CoreLocation
 //class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
-class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UNUserNotificationCenterDelegate, CLLocationManagerDelegate, UITextViewDelegate, UITableViewDelegate,UITableViewDataSource{
+class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UNUserNotificationCenterDelegate, CLLocationManagerDelegate, UITextViewDelegate, UITableViewDelegate,UITableViewDataSource, UIApplicationDelegate{
     
     @IBOutlet weak var tableView:               UITableView!
     @IBOutlet weak var collectionView:          UICollectionView!
@@ -35,7 +35,20 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         var dataController = DataController(managedObjectContext: managedObjectContext, appDelegate: appDelegate)
         return dataController
     }
-
+    
+    //MARK: Force Touch Methos
+    func application(_ application: UIApplication,
+                              performActionFor shortcutItem: UIApplicationShortcutItem,
+                              completionHandler: @escaping (Bool) -> Void) {
+        print ("opened with force touch")
+        print (shortcutItem)
+        if shortcutItem.type == "com.app.newnote" {
+            let newNote = self.dataController.createNote(noteString: "")
+            self.dataController.connectNoteToDay(note: newNote, day: self.dataController.currentDay)
+            self.selectedNote = newNote
+            performSegue(withIdentifier: noteSegueIdentifier, sender: nil)
+        }
+    }
     //MARK: Segue Methods
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == noteSegueIdentifier {
@@ -360,7 +373,19 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         alert.addAction(okAction)
         present(alert,animated: true)
     }
-    
+    func catchNotification(notification:Notification) -> Void {
+        print("Catch notification")
+        
+        if self.dataController.appDelegate.makeNewNote {
+            let newNote = self.dataController.createNote(noteString: "")
+            self.dataController.connectNoteToDay(note: newNote, day: self.dataController.days)
+            self.selectedNote = newNote
+            performSegue(withIdentifier: noteSegueIdentifier, sender: nil)
+            self.dataController.appDelegate.makeNewNote = false
+
+        }
+        
+    }
     //MARK: Lifecycle Methods
     
     override func viewDidLoad() {
@@ -389,15 +414,37 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         }
         tableView.layoutMargins = UIEdgeInsets.zero
         tableView.separatorInset = UIEdgeInsets.zero
+        print (dataController.appDelegate.launchedShortcutItem)
+        let notificationName = Notification.Name("forceTouchNewNote")
+        
+        // Register to receive notification
+        NotificationCenter.default.addObserver(self, selector: #selector(catchNotification), name: notificationName, object: nil)
+        
+        // Post notification
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.dataController.fetchDays()
+        print ("appearded")
         collectionView.reloadData()
         scrollToMostRecentDay()
         updateTextViewFromScroll()
+        print (self.dataController.appDelegate.makeNewNote)
+        if (self.dataController.appDelegate.makeNewNote) {
+            let newNote = self.dataController.createNote(noteString: "")
+            self.dataController.connectNoteToDay(note: newNote, day: self.dataController.days[self.dataController.days.count - 1])
+            self.selectedNote = newNote
+            performSegue(withIdentifier: noteSegueIdentifier, sender: nil)
+            self.dataController.appDelegate.makeNewNote = false
+        }
         print ("appeared")
+        if #available(iOS 9.0, *) {
+            if (UIApplication.shared.shortcutItems?.filter({ $0.type == "com.app.newnote" }).first == nil) {
+                UIApplication.shared.shortcutItems?.append(UIMutableApplicationShortcutItem(type: "com.app.newnote", localizedTitle: "New Note"))
+            }
+        }
     }
     
     

@@ -13,16 +13,13 @@ import UserNotifications
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    var launchedShortcutItem: UIApplicationShortcutItem?
+    var makeNewNote = false
 
-
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-        let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options: [.alert, .sound]) { (granted, error) in
-            // Enable or disable features based on authorization.
-        }
-        return true
-    }
+//    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+//        // Override point for customization after application launch.
+//
+//    }
 
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -36,6 +33,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillEnterForeground(_ application: UIApplication) {
         // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
+
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
@@ -47,6 +45,57 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Saves changes in the application's managed object context before the application terminates.
         self.saveContext()
     }
+    func application(_ application: UIApplication,
+                     performActionFor shortcutItem: UIApplicationShortcutItem,
+                     completionHandler: @escaping (Bool) -> Void) {
+        print ("opened with force touch")
+        print (shortcutItem)
+        if shortcutItem.type == "com.app.newnote" {
+            print ("new note")
+            self.makeNewNote = true
+            let notificationName = Notification.Name("forceTouchNewNote")
+            NotificationCenter.default.post(name: notificationName, object: nil)
+        }
+        completionHandler(handleShortcut(shortcutItem: shortcutItem))
+
+    }
+    // Properties
+    
+    func applicationDidBecomeActive(application: UIApplication) {
+        guard let shortcut = launchedShortcutItem else { return }
+        handleShortcut(shortcutItem: shortcut)
+        launchedShortcutItem = nil
+        
+    }
+    
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool {
+        if let shortcutItem = launchOptions?[UIApplicationLaunchOptionsKey.shortcutItem] as? UIApplicationShortcutItem {
+            launchedShortcutItem = shortcutItem
+            print (launchedShortcutItem)
+            
+        }
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(options: [.alert, .sound]) { (granted, error) in
+            // Enable or disable features based on authorization.
+        }
+        return true
+    }
+    
+    
+    func handleShortcut( shortcutItem:UIApplicationShortcutItem ) -> Bool {
+        
+        // Construct an alert using the details of the shortcut used to open the application.
+//        let alertController = UIAlertController(title: "Shortcut Handled", message: "\"\(shortcutItem.localizedTitle)\"", preferredStyle: .alert)
+//        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+//        alertController.addAction(okAction)
+//        
+//        // Display an alert indicating the shortcut selected from the home screen.
+//        window!.rootViewController?.present(alertController, animated: true, completion: nil)
+        
+        return true
+        
+    }
+    
 
     // MARK: - Core Data stack
 
