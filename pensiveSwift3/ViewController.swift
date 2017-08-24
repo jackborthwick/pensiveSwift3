@@ -365,6 +365,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         }
         return ["suck"]
     }
+    //MARK: miscellaneous
     func presentUnknownErrorAlert() {
         let alert = UIAlertController(title: "An Unkown Error Occurred",
                                       message: "Sorry for the inconvenience.",
@@ -374,34 +375,38 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         alert.addAction(okAction)
         present(alert,animated: true)
     }
+    //MARK: ForceTouch Shortcut Methods
     func catchNotification(notification:Notification) -> Void {
-        print("Catch notification")
-        print(UIApplication.topViewController())
+        //Check if a note has already been created or is currently being edited
         if (UIApplication.topViewController() is NoteViewController ) {
             print ("IT IS IT IS")
-            self.dataController.appDelegate.makeNewNote = false
-            let noteVC = UIApplication.topViewController() as! NoteViewController
-            if noteVC.textView.text == "" || noteVC.textView.text == nil {
-                dataController.managedObjectContext.delete(noteVC.selectedNote)
-            }
-            let newNote = self.dataController.createNote(noteString: "")
-            self.dataController.connectNoteToDay(note: newNote, day: self.dataController.days[self.dataController.days.count - 1])
-            noteVC.selectedNote = newNote
-            noteVC.textView.text = newNote.note
+            handleExistingNote()
         }
         else {
-            if self.dataController.appDelegate.makeNewNote {
-                let newNote = self.dataController.createNote(noteString: "")
-                self.dataController.connectNoteToDay(note: newNote, day: self.dataController.days[self.dataController.days.count - 1])
-                self.selectedNote = newNote
-                performSegue(withIdentifier: noteSegueIdentifier, sender: nil)
-                self.dataController.appDelegate.makeNewNote = false
-            }
+            checkForNewNoteFromShortcut()
         }
+    }
+    func checkForNewNoteFromShortcut() {
+        if (self.dataController.appDelegate.makeNewNote) {
+            let newNote = self.dataController.createNote(noteString: "")
+            self.dataController.connectNoteToDay(note: newNote, day: self.dataController.days[self.dataController.days.count - 1])
+            self.selectedNote = newNote
+            performSegue(withIdentifier: noteSegueIdentifier, sender: nil)
+            self.dataController.appDelegate.makeNewNote = false
+        }
+    }
+    func handleExistingNote() {
+        self.dataController.appDelegate.makeNewNote = false
+        let noteVC = UIApplication.topViewController() as! NoteViewController
+        if noteVC.textView.text == "" || noteVC.textView.text == nil {
+            //delete the note if there was no content
+            dataController.managedObjectContext.delete(noteVC.selectedNote)
+        }
+        let newNote = self.dataController.createNote(noteString: "")
+        self.dataController.connectNoteToDay(note: newNote, day: self.dataController.days[self.dataController.days.count - 1])
+        noteVC.selectedNote = newNote
+        noteVC.textView.text = newNote.note
 
-
-
-        
     }
     //MARK: Lifecycle Methods
     
@@ -423,22 +428,14 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         UNUserNotificationCenter.current().setNotificationCategories([category])
         if (CLLocationManager.locationServicesEnabled()) {
             print ("LOCATION SERVICES ENABLED")
-//            locationManager.requestWhenInUseAuthorization()
             locationManager.requestAlwaysAuthorization()
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-//            locationManager.startUpdatingLocation()
         }
         tableView.layoutMargins = UIEdgeInsets.zero
         tableView.separatorInset = UIEdgeInsets.zero
-        print (dataController.appDelegate.launchedShortcutItem)
         let notificationName = Notification.Name("forceTouchNewNote")
-        
-        // Register to receive notification
         NotificationCenter.default.addObserver(self, selector: #selector(catchNotification), name: notificationName, object: nil)
-        
-        // Post notification
-
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -449,14 +446,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         scrollToMostRecentDay()
         updateTextViewFromScroll()
         print (self.dataController.appDelegate.makeNewNote)
-        if (self.dataController.appDelegate.makeNewNote) {
-            let newNote = self.dataController.createNote(noteString: "")
-            self.dataController.connectNoteToDay(note: newNote, day: self.dataController.days[self.dataController.days.count - 1])
-            self.selectedNote = newNote
-            performSegue(withIdentifier: noteSegueIdentifier, sender: nil)
-            self.dataController.appDelegate.makeNewNote = false
-        }
-        print ("appeared")
+        checkForNewNoteFromShortcut()
         if #available(iOS 9.0, *) {
             if (UIApplication.shared.shortcutItems?.filter({ $0.type == "com.app.newnote" }).first == nil) {
                 UIApplication.shared.shortcutItems?.append(UIMutableApplicationShortcutItem(type: "com.app.newnote", localizedTitle: "New Note"))
