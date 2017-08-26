@@ -15,7 +15,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     @IBOutlet weak var tableView:               UITableView!
     @IBOutlet weak var collectionView:          UICollectionView!
     @IBOutlet weak var noteTextView:            UITextView!
-    
+//    @IBOutlet weak var navigationBar:           UINavigationBar!
     let noteSegueIdentifier = "noteSegueID"
     
 
@@ -150,43 +150,20 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     //MARK: Table View Methods
     func tableView(_ tableView: UITableView,
                    numberOfRowsInSection section: Int) -> Int {
-        if self.dataController.days.count > 0 {
-            return ((self.dataController.currentDay.relationshipDayNote?.count ?? 0))
-        }
-        return 0
+        return (self.dataController.currentDay.relationshipDayNote?.count ?? 0)
+
     }
     
     func tableView(_ tableView: UITableView,
                    cellForRowAt indexPath: IndexPath)
         -> UITableViewCell {
             if self.dataController.days.count > 0 {
-//                if indexPath.row == (self.dataController.currentDay.relationshipDayNote?.count) {
-//                    print (self.dataController.currentDay.relationshipDayNote?.count)
-//                    let cell =
-//                        tableView.dequeueReusableCell(withIdentifier: "Cell",
-//                                                      for: indexPath)
-//                    cell.layoutMargins = UIEdgeInsets.zero
-//                    cell.textLabel?.text = "add a new note + "
-//                    cell.detailTextLabel?.text = ""
-//                    return cell
-//                }
-//                else {
-                    let descriptors = [NSSortDescriptor(key: "order", ascending: true)] as [NSSortDescriptor]
-                    let notes = self.dataController.currentDay.relationshipDayNote?.sortedArray(using: descriptors) as! [Note]!
-                    //                let cell =
-                    //                    tableView.dequeueReusableCell(withIdentifier: "Cell",
-                    //                                              for: indexPath)
-                    //                cell.layoutMargins = UIEdgeInsets.zero
-                    //                cell.detailTextLabel?.text = String(describing: (notes?[indexPath.row] as! Note).note!)
-                    //                cell.textLabel?.text = String(describing:(notes?[indexPath.row] as! Note).date!)
-                    //                return cell
-                    
-                    let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! ExpandingTableViewCell
-                    cell.noteContentLabel.text = notes?[indexPath.row].note!
-                    cell.dateTitleLabel.text = notes?[indexPath.row].date!
-                    return cell
-//                }
-
+                let descriptors = [NSSortDescriptor(key: "order", ascending: true)] as [NSSortDescriptor]
+                let notes = self.dataController.currentDay.relationshipDayNote?.sortedArray(using: descriptors) as! [Note]!
+                let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! ExpandingTableViewCell
+                cell.noteContentLabel.text = notes?[indexPath.row].note!
+                cell.dateTitleLabel.text = notes?[indexPath.row].date!
+                return cell
             }
             else {
                 let cell =
@@ -200,14 +177,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         
         let descriptors = [NSSortDescriptor(key: "order", ascending: true)] as [NSSortDescriptor]
         let notes = self.dataController.currentDay.relationshipDayNote?.sortedArray(using: descriptors) as! [Note]!
-        if indexPath.row != notes?.count {
-            self.selectedNote = (notes?[indexPath.row])!
-        }
-        else {
-            let newNote = self.dataController.createNote(noteString: "")
-            self.dataController.connectNoteToDay(note: newNote, day: self.dataController.currentDay)
-            self.selectedNote = newNote
-        }
+        self.selectedNote = (notes?[indexPath.row])!
         performSegue(withIdentifier: noteSegueIdentifier, sender: nil)
 
     }
@@ -329,6 +299,14 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         
         present(alert, animated: true)
     }
+    
+    @IBAction func manuallyEnterNote(_sender: AnyObject) {
+        let newNote = self.dataController.createNote(noteString: "")
+        self.dataController.connectNoteToDay(note: newNote, day: self.dataController.currentDay)
+        self.selectedNote = newNote
+        performSegue(withIdentifier: noteSegueIdentifier, sender: nil)
+    }
+
     @IBAction func scheduleTestNotification(_sender: AnyObject) {
         createNotification(firingTime: "")
     }
