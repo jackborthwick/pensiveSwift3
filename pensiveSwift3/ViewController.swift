@@ -442,10 +442,11 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        collectionView.reloadData()
         self.dataController.fetchDays()
+        collectionView.reloadData()
         updateTextViewFromScroll()
         self.configureNotifications()
+        scrollToMostRecentDay() 
         if (CLLocationManager.locationServicesEnabled()) {
             print ("LOCATION SERVICES ENABLED")
             locationManager.requestAlwaysAuthorization()
