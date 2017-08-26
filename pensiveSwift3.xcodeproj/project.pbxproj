@@ -20,6 +20,7 @@
 		61A91B0C1F4B533100AC6514 /* Day+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61A91B081F4B533100AC6514 /* Day+CoreDataProperties.swift */; };
 		61A91B0D1F4B533100AC6514 /* Note+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61A91B091F4B533100AC6514 /* Note+CoreDataClass.swift */; };
 		61A91B0E1F4B533100AC6514 /* Note+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61A91B0A1F4B533100AC6514 /* Note+CoreDataProperties.swift */; };
+		61B2B4A31F520BC200BF9D60 /* SearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B2B4A21F520BC200BF9D60 /* SearchViewController.swift */; };
 		61DB0C171F4DF8E0001D4522 /* DataController.swft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61DB0C161F4DF8E0001D4522 /* DataController.swft.swift */; };
 /* End PBXBuildFile section */
 
@@ -39,6 +40,7 @@
 		61A91B081F4B533100AC6514 /* Day+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Day+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		61A91B091F4B533100AC6514 /* Note+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Note+CoreDataClass.swift"; sourceTree = "<group>"; };
 		61A91B0A1F4B533100AC6514 /* Note+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Note+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		61B2B4A21F520BC200BF9D60 /* SearchViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchViewController.swift; sourceTree = "<group>"; };
 		61DB0C161F4DF8E0001D4522 /* DataController.swft.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataController.swft.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -88,6 +90,7 @@
 				614EA94B1F38D713000993D2 /* LaunchScreen.storyboard */,
 				614EA94E1F38D713000993D2 /* Info.plist */,
 				614EA9461F38D713000993D2 /* pensiveSwift3.xcdatamodeld */,
+				61B2B4A21F520BC200BF9D60 /* SearchViewController.swift */,
 			);
 			path = pensiveSwift3;
 			sourceTree = "<group>";
@@ -183,6 +186,7 @@
 				614EA9421F38D713000993D2 /* ViewController.swift in Sources */,
 				614EA9401F38D713000993D2 /* AppDelegate.swift in Sources */,
 				61DB0C171F4DF8E0001D4522 /* DataController.swft.swift in Sources */,
+				61B2B4A31F520BC200BF9D60 /* SearchViewController.swift in Sources */,
 				61A91B0D1F4B533100AC6514 /* Note+CoreDataClass.swift in Sources */,
 				614EA9551F38F17D000993D2 /* DayCollectionViewCell.swift in Sources */,
 				61A91B0C1F4B533100AC6514 /* Day+CoreDataProperties.swift in Sources */,

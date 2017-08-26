@@ -10,13 +10,14 @@ import UIKit
 import UserNotifications
 import CoreLocation
 //class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
-class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UNUserNotificationCenterDelegate, CLLocationManagerDelegate, UITextViewDelegate, UITableViewDelegate,UITableViewDataSource, UIApplicationDelegate{
+class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UNUserNotificationCenterDelegate, CLLocationManagerDelegate, UITextViewDelegate, UITableViewDelegate,UITableViewDataSource, UIApplicationDelegate, SearchViewControllerDelegate {
     
     @IBOutlet weak var tableView:               UITableView!
     @IBOutlet weak var collectionView:          UICollectionView!
     @IBOutlet weak var noteTextView:            UITextView!
 //    @IBOutlet weak var navigationBar:           UINavigationBar!
     let noteSegueIdentifier = "noteSegueID"
+    let searchSegueIdentifier = "searchSegueID"
     
 
     var selectedNote = Note()
@@ -41,6 +42,15 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         return dataController
     }
     
+    //Custom Delegate Methods
+    func searchViewControllerResponse(dayPassedBack: Day) {
+        print (dayPassedBack)
+        let indexOfDay = self.dataController.days.index(of: dayPassedBack)
+        let indexPath = NSIndexPath(item: indexOfDay!, section: 0) // 1
+        self.collectionView.scrollToItem(at: indexPath as IndexPath, at: UICollectionViewScrollPosition.left, animated: true)
+//        updateTextViewFromScroll()
+    }
+    
     //MARK: Force Touch Methos
     func application(_ application: UIApplication,
                               performActionFor shortcutItem: UIApplicationShortcutItem,
@@ -59,6 +69,10 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         if segue.identifier == noteSegueIdentifier {
             let noteVC = segue.destination as? NoteViewController
             noteVC?.selectedNote = self.selectedNote
+        }
+        if segue.identifier == searchSegueIdentifier {
+            let searchVC = segue.destination as? SearchViewController
+            searchVC?.delegate = self
         }
     }
  
@@ -301,6 +315,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     }
     
     @IBAction func manuallyEnterNote(_sender: AnyObject) {
+//        self.dataController.fetchDays()
         let newNote = self.dataController.createNote(noteString: "")
         self.dataController.connectNoteToDay(note: newNote, day: self.dataController.currentDay)
         self.selectedNote = newNote
@@ -453,7 +468,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         print ("appearded")
         self.dataController.fetchDays()
         collectionView.reloadData()
-        scrollToMostRecentDay()
+//        scrollToMostRecentDay()
         updateTextViewFromScroll()
         print (self.dataController.appDelegate.makeNewNote)
         checkForNewNoteFromShortcut()

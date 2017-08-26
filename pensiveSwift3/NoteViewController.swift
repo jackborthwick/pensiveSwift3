@@ -17,6 +17,7 @@ class NoteViewController: UIViewController, UITextViewDelegate {
         selectedNote.note = textView.text
     }
     
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
 
     }
