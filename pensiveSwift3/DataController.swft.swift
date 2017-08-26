@@ -12,7 +12,11 @@ import CoreData
 class DataController {
     var days: [Day] = []
     var currentDay = Day()
-    let formatter = DateFormatter()
+    let formatter : DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yyyy"
+        return formatter
+    }()
     var managedObjectContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
     var appDelegate = AppDelegate()
     
@@ -60,11 +64,23 @@ class DataController {
     
     func fetchDays (){
         do {
+            let calendar = NSCalendar.current
+
             days = try managedObjectContext.fetch(Day.fetchRequest())
             if days.count > 0 {
-                self.currentDay = days[days.count - 1]
+                if calendar.isDateInToday(formatter.date(from:days[days.count - 1].date!)!) {
+                    self.currentDay = days[days.count - 1]
+                }
+                else {
+                    let newDay = createDay(date: Date())
+                    days.append(newDay)
+                    self.currentDay = days[days.count - 1]
+                }
             }
             else {
+                let newDay = createDay(date: Date())
+                days.append(newDay)
+                self.currentDay = days[days.count - 1]
                 addOnboardingDay()
             }
 

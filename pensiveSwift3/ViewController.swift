@@ -21,11 +21,16 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
 
     var selectedNote = Note()
     let reuseIdentifierCollectionView = "CVCell"
-    let formatter = DateFormatter()
-    var lastOffsetCapture = TimeInterval.abs(0)
+
+    var lastOffsetCapture = abs(TimeInterval(0))
     var previousOffset = CGPoint.init(x:0, y:0)
     let locationManager = CLLocationManager()
     lazy var dataController :DataController = self.initializeDataController()
+    let formatter : DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yyyy"
+        return formatter
+    }()
     
     func initializeDataController() -> DataController {
         let appDelegate =
@@ -123,9 +128,8 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             noteTextView.text = String(describing: self.dataController.days[(indexPath?.row)!].relationshipDayNote!.allObjects.count)
 
             self.dataController.currentDay = self.dataController.days[(indexPath?.row)!]
+            self.title = self.dataController.currentDay.date
             tableView.reloadData()
-
-//            print(self.currentDay)
             if self.dataController.days[(indexPath?.row)!].value(forKey: "weather") != nil {
                 noteTextView.text = self.dataController.days[(indexPath?.row)!].value(forKey: "weather") as! String
                 noteTextView.text = (noteTextView.text + "\n" + "Latitude:" + (self.dataController.days[(indexPath?.row)!].value(forKey: "latitude") as! String))
@@ -147,6 +151,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     func tableView(_ tableView: UITableView,
                    numberOfRowsInSection section: Int) -> Int {
         if self.dataController.days.count > 0 {
+            print ("num rows: " + String((self.dataController.currentDay.relationshipDayNote?.count ?? 0) + 1))
             return ((self.dataController.currentDay.relationshipDayNote?.count ?? 0) + 1)
         }
         return 1
@@ -161,7 +166,8 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                         tableView.dequeueReusableCell(withIdentifier: "Cell",
                                                       for: indexPath)
                     cell.layoutMargins = UIEdgeInsets.zero
-                    cell.textLabel?.text = "add a new note"
+                    cell.textLabel?.text = "add a new note + "
+                    cell.detailTextLabel?.text = ""
                     return cell
                 }
                 let descriptors = [NSSortDescriptor(key: "order", ascending: true)] as [NSSortDescriptor]
@@ -170,8 +176,8 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                     tableView.dequeueReusableCell(withIdentifier: "Cell",
                                               for: indexPath)
                 cell.layoutMargins = UIEdgeInsets.zero
-                cell.textLabel?.text = String(describing: (notes?[indexPath.row] as! Note).note!)
-                cell.textLabel?.text = (cell.textLabel?.text)! + String(describing:(notes?[indexPath.row] as! Note).date!)
+                cell.detailTextLabel?.text = String(describing: (notes?[indexPath.row] as! Note).note!)
+                cell.textLabel?.text = String(describing:(notes?[indexPath.row] as! Note).date!)
                 return cell
             }
             else {
@@ -190,12 +196,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             self.selectedNote = (notes?[indexPath.row])!
         }
         else {
-            guard let appDelegate =
-                UIApplication.shared.delegate as? AppDelegate else {
-                    return
-            }
-            let managedObjectContext =
-                appDelegate.persistentContainer.viewContext
             let newNote = self.dataController.createNote(noteString: "")
             self.dataController.connectNoteToDay(note: newNote, day: self.dataController.currentDay)
             self.selectedNote = newNote
@@ -233,7 +233,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             updateTextViewFromScroll()
         }
     }
-       //MARK: Local Notification Delegate Methods
+       //MARK: Local Notification Methods
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.alert, .sound, .badge])
         
@@ -260,7 +260,17 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             alert.addAction(okAction)
             present(alert, animated: true)
         }
-
+    }
+    func configureNotifications() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound,.badge], completionHandler: {didAllow,Error in })
+        UNUserNotificationCenter.current().delegate = self
+        let textAction = UNTextInputNotificationAction(identifier: "textActionId", title: "Enter Memory", options: [], textInputButtonTitle: "Add", textInputPlaceholder: "")
+        let category = UNNotificationCategory(
+            identifier: "categoryId.category",
+            actions: [textAction],
+            intentIdentifiers: [],
+            options: [])
+        UNUserNotificationCenter.current().setNotificationCategories([category])
     }
     
     //MARK: Local Notification Scheduling Methods
@@ -413,24 +423,17 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView.reloadData()
+        self.dataController.fetchDays()
         updateTextViewFromScroll()
-        self.formatter.dateFormat = "dd.MM.yyyy"
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound,.badge], completionHandler: {didAllow,Error in })
-        UNUserNotificationCenter.current().delegate = self
-        
-
-        let textAction = UNTextInputNotificationAction(identifier: "textActionId", title: "Enter Memory", options: [], textInputButtonTitle: "Add", textInputPlaceholder: "")
-        let category = UNNotificationCategory(
-            identifier: "categoryId.category",
-            actions: [textAction],
-            intentIdentifiers: [],
-            options: [])
-        UNUserNotificationCenter.current().setNotificationCategories([category])
+        self.configureNotifications()
         if (CLLocationManager.locationServicesEnabled()) {
             print ("LOCATION SERVICES ENABLED")
             locationManager.requestAlwaysAuthorization()
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            if self.dataController.currentDay.weather == nil {
+                locationManager.startUpdatingLocation() 
+            }
         }
         tableView.layoutMargins = UIEdgeInsets.zero
         tableView.separatorInset = UIEdgeInsets.zero
@@ -440,7 +443,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.dataController.fetchDays()
         print ("appearded")
         collectionView.reloadData()
         scrollToMostRecentDay()

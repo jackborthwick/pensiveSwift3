@@ -32,6 +32,7 @@ class NoteViewController: UIViewController, UITextViewDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
             print("appearing")
+        self.title = selectedNote.date
     }
     
 
