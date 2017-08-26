@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="12141" systemVersion="16G29" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="Day" representedClassName="Day" syncable="YES">
+        <attribute name="city" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="date" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="latitude" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="longitude" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="state" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="streetAddress" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="weather" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="relationshipDayNote" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Note" inverseName="relationshipNotesDay" inverseEntity="Note" syncable="YES"/>
     </entity>
@@ -20,8 +23,8 @@
         <attribute name="startTime" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Day" positionX="-63" positionY="-18" width="128" height="120"/>
-        <element name="NotificationSetting" positionX="-54" positionY="18" width="128" height="105"/>
+        <element name="Day" positionX="-63" positionY="-18" width="128" height="165"/>
         <element name="Note" positionX="-54" positionY="27" width="128" height="105"/>
+        <element name="NotificationSetting" positionX="-54" positionY="18" width="128" height="105"/>
     </elements>
 </model>

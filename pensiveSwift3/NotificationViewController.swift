@@ -20,15 +20,18 @@ class NotificationViewController: UIViewController {
 
     @IBAction func pressedScheduleNotifications(_sender: AnyObject) {
         scheduleNotifications()
-        let alert = UIAlertController(title: "Deleted!",
-                                      message: "All pending notifications have been cancelled.",
-                                      preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "Ok",
-                                                        style: .default){
-                                                            UIAlertAction in
-        }
     }
     @IBAction func pressedDeleteNotifications(_sender: AnyObject) {
+        let confirmationAlert = UIAlertController(title: "Notifications Deleted!",
+                                                  message: "",
+                                                  preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK",
+                                     style: .default) {
+                                        UIAlertAction in
+                                        self.navigationController?.popViewController(animated: true)
+        }
+        confirmationAlert.addAction(okAction)
+        present(confirmationAlert, animated: true)
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
     }
     @IBAction func notificationStepperChanged (_sender: AnyObject){
@@ -107,9 +110,6 @@ class NotificationViewController: UIViewController {
         }
     }
     
-    func printTime() {
-
-    }
 
     
     func dismissKeyboard() {

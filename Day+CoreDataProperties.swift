@@ -17,6 +17,9 @@ extension Day {
     }
 
     @NSManaged public var date: String?
+    @NSManaged public var city: String?
+    @NSManaged public var state: String?
+    @NSManaged public var streetAddress: String?
     @NSManaged public var latitude: String?
     @NSManaged public var longitude: String?
     @NSManaged public var weather: String?

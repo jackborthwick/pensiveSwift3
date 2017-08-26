@@ -78,7 +78,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         else if self.dataController.days.count != 0 {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifierCollectionView, for: indexPath as     IndexPath) as! DayCollectionViewCell
             let day = self.dataController.days[indexPath.row - 1]
-            cell.dayDateLabel.text = day.value(forKey: "date") as? String
+            cell.dayDateLabel.text = day.date
             return cell
 
         }
@@ -130,11 +130,12 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             self.dataController.currentDay = self.dataController.days[(indexPath?.row)!]
             self.title = self.dataController.currentDay.date
             tableView.reloadData()
-            if self.dataController.days[(indexPath?.row)!].value(forKey: "weather") != nil {
-                noteTextView.text = self.dataController.days[(indexPath?.row)!].value(forKey: "weather") as! String
-                noteTextView.text = (noteTextView.text + "\n" + "Latitude:" + (self.dataController.days[(indexPath?.row)!].value(forKey: "latitude") as! String))
-                noteTextView.text = noteTextView.text + "\n" + "Longitude:" + (self.dataController.days[(indexPath?.row)!].value(forKey: "longitude") as! String)
+            if self.dataController.days[(indexPath?.row)!].weather != nil {
+                noteTextView.text = self.dataController.days[(indexPath?.row)!].weather!
                 noteTextView.text = noteTextView.text + "\n" + String(self.dataController.days[(indexPath?.row)!].relationshipDayNote!.count)
+                if self.dataController.days[(indexPath?.row)!].city != nil {
+                    noteTextView.text = noteTextView.text + "\n" + self.dataController.days[(indexPath?.row)!].streetAddress!
+                }
             }
         }
     }
@@ -146,39 +147,46 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     }
     
     
-//    //MARK: Table View Methods
-//    
+    //MARK: Table View Methods
     func tableView(_ tableView: UITableView,
                    numberOfRowsInSection section: Int) -> Int {
         if self.dataController.days.count > 0 {
-            print ("num rows: " + String((self.dataController.currentDay.relationshipDayNote?.count ?? 0) + 1))
-            return ((self.dataController.currentDay.relationshipDayNote?.count ?? 0) + 1)
+            return ((self.dataController.currentDay.relationshipDayNote?.count ?? 0))
         }
-        return 1
+        return 0
     }
     
     func tableView(_ tableView: UITableView,
                    cellForRowAt indexPath: IndexPath)
         -> UITableViewCell {
             if self.dataController.days.count > 0 {
-                if indexPath.row == (self.dataController.currentDay.relationshipDayNote?.count) {
-                    let cell =
-                        tableView.dequeueReusableCell(withIdentifier: "Cell",
-                                                      for: indexPath)
-                    cell.layoutMargins = UIEdgeInsets.zero
-                    cell.textLabel?.text = "add a new note + "
-                    cell.detailTextLabel?.text = ""
+//                if indexPath.row == (self.dataController.currentDay.relationshipDayNote?.count) {
+//                    print (self.dataController.currentDay.relationshipDayNote?.count)
+//                    let cell =
+//                        tableView.dequeueReusableCell(withIdentifier: "Cell",
+//                                                      for: indexPath)
+//                    cell.layoutMargins = UIEdgeInsets.zero
+//                    cell.textLabel?.text = "add a new note + "
+//                    cell.detailTextLabel?.text = ""
+//                    return cell
+//                }
+//                else {
+                    let descriptors = [NSSortDescriptor(key: "order", ascending: true)] as [NSSortDescriptor]
+                    let notes = self.dataController.currentDay.relationshipDayNote?.sortedArray(using: descriptors) as! [Note]!
+                    //                let cell =
+                    //                    tableView.dequeueReusableCell(withIdentifier: "Cell",
+                    //                                              for: indexPath)
+                    //                cell.layoutMargins = UIEdgeInsets.zero
+                    //                cell.detailTextLabel?.text = String(describing: (notes?[indexPath.row] as! Note).note!)
+                    //                cell.textLabel?.text = String(describing:(notes?[indexPath.row] as! Note).date!)
+                    //                return cell
+                    
+                    let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! ExpandingTableViewCell
+                    cell.noteContentLabel.text = notes?[indexPath.row].note!
+                    cell.dateTitleLabel.text = notes?[indexPath.row].date!
                     return cell
-                }
-                let descriptors = [NSSortDescriptor(key: "order", ascending: true)] as [NSSortDescriptor]
-                let notes = self.dataController.currentDay.relationshipDayNote?.sortedArray(using: descriptors) as NSArray!
-                let cell =
-                    tableView.dequeueReusableCell(withIdentifier: "Cell",
-                                              for: indexPath)
-                cell.layoutMargins = UIEdgeInsets.zero
-                cell.detailTextLabel?.text = String(describing: (notes?[indexPath.row] as! Note).note!)
-                cell.textLabel?.text = String(describing:(notes?[indexPath.row] as! Note).date!)
-                return cell
+//                }
+
             }
             else {
                 let cell =
@@ -308,7 +316,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                 let noteToSave = textField.text else {
                     return
             }
-            
             self.dataController.saveAction(noteString: noteToSave, date: Date())
             self.collectionView.reloadData()
             self.updateTextViewFromScroll()
@@ -331,18 +338,13 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         print ("LOCATION LOCATION LOCATION")
         print(didUpdateLocations[0].coordinate)
         
-        if self.dataController.days[self.dataController.days.count - 1].value(forKey: "longitude") == nil {
-            guard let appDelegate =
-                UIApplication.shared.delegate as? AppDelegate else {
-                    return
-            }
-            let managedObjectContext =
-                appDelegate.persistentContainer.viewContext
-            self.dataController.days[self.dataController.days.count - 1].setValue(String(format: "%f", didUpdateLocations[0].coordinate.longitude), forKey: "longitude")
-            self.dataController.days[self.dataController.days.count - 1].setValue(String(format: "%f", didUpdateLocations[0].coordinate.latitude), forKey: "latitude")
-            self.dataController.days[self.dataController.days.count - 1].setValue(getWeather(lat: String(format: "%f", didUpdateLocations[0].coordinate.latitude), lon: String(format: "%f", didUpdateLocations[0].coordinate.longitude))[0] , forKey: "weather")
+        if self.dataController.days[self.dataController.days.count - 1].longitude == nil {
+            self.dataController.days[self.dataController.days.count - 1].longitude = (String(format: "%f", didUpdateLocations[0].coordinate.longitude))
+            self.dataController.days[self.dataController.days.count - 1].latitude = (String(format: "%f", didUpdateLocations[0].coordinate.latitude))
+            self.dataController.days[self.dataController.days.count - 1].weather = getWeather(lat: String(format: "%f", didUpdateLocations[0].coordinate.latitude), lon: String(format: "%f", didUpdateLocations[0].coordinate.longitude))[0]
+            geocodeLocation(location: didUpdateLocations[0])
             do {
-                try managedObjectContext.save()
+                try self.dataController.managedObjectContext.save()
                 self.dataController.fetchDays()
                 collectionView.reloadData()
                 updateTextViewFromScroll()
@@ -351,6 +353,31 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             }
         }
         locationManager.stopUpdatingLocation()
+    }
+    
+    func geocodeLocation(location: CLLocation){
+        CLGeocoder().reverseGeocodeLocation(location, completionHandler: {(placemarks, error) -> Void in
+            if error != nil {
+                print("Reverse geocoder failed with error" + (error?.localizedDescription)!)
+            }
+            if (placemarks?.count)! > 0 {
+                let pm = placemarks?[0]
+                self.dataController.currentDay.city = pm?.locality
+                self.dataController.currentDay.state = pm?.administrativeArea
+                self.dataController.currentDay.streetAddress = pm?.name
+                do {
+                    try self.dataController.managedObjectContext.save()
+                    self.dataController.fetchDays()
+                    self.updateTextViewFromScroll()
+                }
+                catch let error as NSError {
+                    print("Can't save that my dude. Here's why --> \(error), \(error.userInfo)")
+                }
+            }
+            else {
+                print("Problem with the data received from geocoder")
+            }
+        })
     }
     
     @objc func locationManager(_: CLLocationManager, didFailWithError: Error) {
@@ -432,11 +459,13 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
             if self.dataController.currentDay.weather == nil {
-                locationManager.startUpdatingLocation() 
+                locationManager.startUpdatingLocation()
             }
         }
         tableView.layoutMargins = UIEdgeInsets.zero
         tableView.separatorInset = UIEdgeInsets.zero
+        tableView.estimatedRowHeight = 60
+        tableView.rowHeight = UITableViewAutomaticDimension
         let notificationName = Notification.Name("forceTouchNewNote")
         NotificationCenter.default.addObserver(self, selector: #selector(catchNotification), name: notificationName, object: nil)
     }
@@ -444,6 +473,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         print ("appearded")
+        self.dataController.fetchDays()
         collectionView.reloadData()
         scrollToMostRecentDay()
         updateTextViewFromScroll()
@@ -478,6 +508,33 @@ extension UIApplication {
             return topViewController(controller: presented)
         }
         return controller
+    }
+}
+
+class ExpandingTableViewCellContent {
+    var dateTitle       :           String?
+    var noteContent     :           String?
+    var expanded        :           Bool
+    
+    init(dateTitle: String, noteContent: String) {
+        self.dateTitle = dateTitle
+        self.noteContent = noteContent
+        self.expanded = false
+    }
+}
+class ExpandingTableViewCell: UITableViewCell {
+    @IBOutlet var dateTitleLabel    :           UILabel!
+    @IBOutlet var noteContentLabel  :           UILabel!
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+    }
+    
+    func set(content: ExpandingTableViewCellContent) {
+        self.dateTitleLabel.text     = content.dateTitle
+        //        self.noteContentLabel.text   = content.expanded ? content.noteContent : ""
+        self.noteContentLabel.text   = content.noteContent
+        
     }
 }
 
