@@ -51,6 +51,10 @@ class SearchViewController: UIViewController, UITableViewDataSource, UITableView
             let fetchResults = try self.dataController.managedObjectContext.fetch(fetchRequest) as? [Note]
             if fetchResults!.count > 0 {
                 searchResultNotes = fetchResults!
+                print (searchResultNotes)
+
+                searchResultNotes = searchResultNotes.sorted(by: { $0.convertedTime.compare($1.convertedTime) == ComparisonResult.orderedDescending })
+                print (searchResultNotes)
                 tableView.reloadData()
                 print ("We have notes with that content")
                 

@@ -26,8 +26,8 @@ class DataController {
         self.formatter.dateFormat = "dd.MM.yyyy"
         self.fetchDays()
     }
-    func createNote(noteString: String) -> Note{
-        let date = Date()
+    func createNote(noteString: String, date: Date) -> Note{
+        let date = date
         let entityDescription =
             NSEntityDescription.entity(forEntityName: "Note",
                                        in: managedObjectContext)!
@@ -118,13 +118,13 @@ class DataController {
         let calendar = Calendar.current
         let yesterday = calendar.date(byAdding: .day, value: -1, to: Date())
         let onboardingDay = createDay(date: yesterday!)
-        let note = createNote(noteString: "Hiya, this your first time here?")
+        let note = createNote(noteString: "Hiya, this your first time here?", date: yesterday!)
         onboardingDay.addToRelationshipDayNote(note)
         saveContext()
     }
     
     func saveAction(noteString: String, date: Date) -> Bool {
-        let note = self.createNote(noteString: noteString)
+        let note = self.createNote(noteString: noteString, date: Date())
         if !(checkDayExistence(date: Date())) {//Create day and note
             let day = createDay(date: date)
             self.connectNoteToDay(note: note, day: day)

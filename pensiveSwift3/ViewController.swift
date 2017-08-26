@@ -58,7 +58,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         print ("opened with force touch")
         print (shortcutItem)
         if shortcutItem.type == "com.app.newnote" {
-            let newNote = self.dataController.createNote(noteString: "")
+            let newNote = self.dataController.createNote(noteString: "", date: Date())
             self.dataController.connectNoteToDay(note: newNote, day: self.dataController.currentDay)
             self.selectedNote = newNote
             performSegue(withIdentifier: noteSegueIdentifier, sender: nil)
@@ -316,7 +316,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     @IBAction func manuallyEnterNote(_sender: AnyObject) {
 //        self.dataController.fetchDays()
-        let newNote = self.dataController.createNote(noteString: "")
+        let newNote = self.dataController.createNote(noteString: "", date: Date())
         self.dataController.connectNoteToDay(note: newNote, day: self.dataController.currentDay)
         self.selectedNote = newNote
         performSegue(withIdentifier: noteSegueIdentifier, sender: nil)
@@ -418,7 +418,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     }
     func checkForNewNoteFromShortcut() {
         if (self.dataController.appDelegate.makeNewNote) {
-            let newNote = self.dataController.createNote(noteString: "")
+            let newNote = self.dataController.createNote(noteString: "", date: Date())
             self.dataController.connectNoteToDay(note: newNote, day: self.dataController.days[self.dataController.days.count - 1])
             self.selectedNote = newNote
             performSegue(withIdentifier: noteSegueIdentifier, sender: nil)
@@ -432,7 +432,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             //delete the note if there was no content
             dataController.managedObjectContext.delete(noteVC.selectedNote)
         }
-        let newNote = self.dataController.createNote(noteString: "")
+        let newNote = self.dataController.createNote(noteString: "", date: Date())
         self.dataController.connectNoteToDay(note: newNote, day: self.dataController.days[self.dataController.days.count - 1])
         noteVC.selectedNote = newNote
         noteVC.textView.text = newNote.note

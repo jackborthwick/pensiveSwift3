@@ -21,4 +21,8 @@ extension Note {
     @NSManaged public var order: Int16
     @NSManaged public var relationshipNotesDay: Day?
 
+    
+    var convertedTime : Date {
+        return self.formatter.date(from: date!)!
+    }
 }
