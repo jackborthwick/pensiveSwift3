@@ -19,11 +19,7 @@ class SearchViewController: UIViewController, UITableViewDataSource, UITableView
     var searchResultNotes = [Note]()
     var selectedNote = Note()
     lazy var dataController :DataController = self.initializeDataController()
-    let formatter : DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yyyy"
-        return formatter
-    }()
+
     
     func initializeDataController() -> DataController {
         let appDelegate =

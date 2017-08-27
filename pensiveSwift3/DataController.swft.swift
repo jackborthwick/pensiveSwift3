@@ -14,7 +14,12 @@ class DataController {
     var currentDay = Day()
     let formatter : DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yyyy"
+        formatter.dateFormat = "MM/dd/yyyy"
+        return formatter
+    }()
+    let noteFormatter : DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd/yyyy HH:mm"
         return formatter
     }()
     var managedObjectContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
@@ -23,7 +28,6 @@ class DataController {
     init(managedObjectContext: NSManagedObjectContext, appDelegate: AppDelegate ) {
         self.appDelegate = appDelegate
         self.managedObjectContext = managedObjectContext
-        self.formatter.dateFormat = "dd.MM.yyyy"
         self.fetchDays()
     }
     func createNote(noteString: String, date: Date) -> Note{
@@ -32,7 +36,7 @@ class DataController {
             NSEntityDescription.entity(forEntityName: "Note",
                                        in: managedObjectContext)!
         let note = NSManagedObject(entity: entityDescription, insertInto: managedObjectContext) as! Note
-        note.date = self.formatter.string(from: date)
+        note.date = self.noteFormatter.string(from: date)
         note.note = noteString
         return note
     }

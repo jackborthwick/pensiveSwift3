@@ -12,9 +12,12 @@ import CoreLocation
 //class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
 class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UNUserNotificationCenterDelegate, CLLocationManagerDelegate, UITextViewDelegate, UITableViewDelegate,UITableViewDataSource, UIApplicationDelegate, SearchViewControllerDelegate {
     
-    @IBOutlet weak var tableView:               UITableView!
-    @IBOutlet weak var collectionView:          UICollectionView!
-    @IBOutlet weak var noteTextView:            UITextView!
+    @IBOutlet weak var tableView:                           UITableView!
+    @IBOutlet weak var collectionView:                      UICollectionView!
+    @IBOutlet weak var noteTextView:                        UITextView!
+    @IBOutlet weak var settingsBarButtonItem:               UIBarButtonItem!
+    @IBOutlet weak var searchBarButtonItem:                 UIBarButtonItem!
+    @IBOutlet weak var addNoteBarButtonItem:                UIBarButtonItem!
 //    @IBOutlet weak var navigationBar:           UINavigationBar!
     let noteSegueIdentifier = "noteSegueID"
     let searchSegueIdentifier = "searchSegueID"
@@ -26,13 +29,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     var lastOffsetCapture = abs(TimeInterval(0))
     var previousOffset = CGPoint.init(x:0, y:0)
     let locationManager = CLLocationManager()
-    lazy var dataController :DataController = self.initializeDataController()
-    let formatter : DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yyyy"
-        return formatter
-    }()
-    
+    lazy var dataController :DataController = self.initializeDataController()    
     func initializeDataController() -> DataController {
         let appDelegate =
             UIApplication.shared.delegate as! AppDelegate
@@ -40,6 +37,13 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             appDelegate.persistentContainer.viewContext
         let dataController = DataController(managedObjectContext: managedObjectContext, appDelegate: appDelegate)
         return dataController
+    }
+    
+    func initializeBarButtonItem() {
+        settingsBarButtonItem.title = String(NSString(string: "\u{2699}\u{0000FE0E}"))
+        let font = UIFont.systemFont(ofSize: 28) // adjust the size as required
+        let attributes = [NSFontAttributeName : font]
+        settingsBarButtonItem.setTitleTextAttributes(attributes, for: .normal)
     }
     
     //Custom Delegate Methods
@@ -55,7 +59,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     func application(_ application: UIApplication,
                               performActionFor shortcutItem: UIApplicationShortcutItem,
                               completionHandler: @escaping (Bool) -> Void) {
-        print ("opened with force touch")
         print (shortcutItem)
         if shortcutItem.type == "com.app.newnote" {
             let newNote = self.dataController.createNote(noteString: "", date: Date())
@@ -138,6 +141,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     func updateTextViewFromScroll () {
         print ("updating")
         let indexPath = collectionView.indexPathForItem(at: getSliderCenter())
+        self.collectionView.scrollToItem(at: indexPath!, at: UICollectionViewScrollPosition.left, animated: true) //to snap note to center
         if ((indexPath != nil) && (indexPath!.row <= self.dataController.days.count - 1)) {
             noteTextView.text = String(describing: self.dataController.days[(indexPath?.row)!].relationshipDayNote!.allObjects.count)
 
@@ -164,6 +168,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     //MARK: Table View Methods
     func tableView(_ tableView: UITableView,
                    numberOfRowsInSection section: Int) -> Int {
+        print (self.dataController.currentDay.relationshipDayNote?.count ?? 0)
         return (self.dataController.currentDay.relationshipDayNote?.count ?? 0)
 
     }
@@ -199,6 +204,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         let descriptors = [NSSortDescriptor(key: "order", ascending: true)] as [NSSortDescriptor]
         let notes = self.dataController.currentDay.relationshipDayNote?.sortedArray(using: descriptors) as! [Note]!
         if indexPath.row != notes?.count {
+
             return true
         }
         return false
@@ -442,6 +448,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        initializeBarButtonItem()
         self.dataController.fetchDays()
         collectionView.reloadData()
         updateTextViewFromScroll()
