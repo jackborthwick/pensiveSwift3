@@ -12,12 +12,13 @@ import CoreLocation
 //class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
 class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIScrollViewDelegate, UNUserNotificationCenterDelegate, CLLocationManagerDelegate, UITextViewDelegate, UITableViewDelegate,UITableViewDataSource, UIApplicationDelegate, SearchViewControllerDelegate {
     
-    @IBOutlet weak var tableView:                           UITableView!
-    @IBOutlet weak var collectionView:                      UICollectionView!
-    @IBOutlet weak var noteTextView:                        UITextView!
-    @IBOutlet weak var settingsBarButtonItem:               UIBarButtonItem!
-    @IBOutlet weak var searchBarButtonItem:                 UIBarButtonItem!
-    @IBOutlet weak var addNoteBarButtonItem:                UIBarButtonItem!
+    @IBOutlet weak var tableView                :                   UITableView!
+    @IBOutlet weak var collectionView           :                   UICollectionView!
+    @IBOutlet weak var locationLabel            :                   UILabel!
+    @IBOutlet weak var temperatureLabel         :                   UILabel!
+    @IBOutlet weak var settingsBarButtonItem    :                   UIBarButtonItem!
+    @IBOutlet weak var searchBarButtonItem      :                   UIBarButtonItem!
+    @IBOutlet weak var addNoteBarButtonItem     :                   UIBarButtonItem!
 //    @IBOutlet weak var navigationBar:           UINavigationBar!
     let noteSegueIdentifier = "noteSegueID"
     let searchSegueIdentifier = "searchSegueID"
@@ -69,6 +70,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     }
     //MARK: Segue Methods
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        self.title = ""//to stop date from showing up in back button of child vc's
         if segue.identifier == noteSegueIdentifier {
             let noteVC = segue.destination as? NoteViewController
             noteVC?.selectedNote = self.selectedNote
@@ -143,16 +145,13 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         let indexPath = collectionView.indexPathForItem(at: getSliderCenter())
         self.collectionView.scrollToItem(at: indexPath!, at: UICollectionViewScrollPosition.left, animated: true) //to snap note to center
         if ((indexPath != nil) && (indexPath!.row <= self.dataController.days.count - 1)) {
-            noteTextView.text = String(describing: self.dataController.days[(indexPath?.row)!].relationshipDayNote!.allObjects.count)
-
             self.dataController.currentDay = self.dataController.days[(indexPath?.row)!]
             self.title = self.dataController.currentDay.date
             tableView.reloadData()
             if self.dataController.days[(indexPath?.row)!].weather != nil {
-                noteTextView.text = self.dataController.days[(indexPath?.row)!].weather!
-                noteTextView.text = noteTextView.text + "\n" + String(self.dataController.days[(indexPath?.row)!].relationshipDayNote!.count)
+                temperatureLabel.text = (self.dataController.days[(indexPath?.row)!].weather!).components(separatedBy: ".")[0] + "°"
                 if self.dataController.days[(indexPath?.row)!].city != nil {
-                    noteTextView.text = noteTextView.text + "\n" + self.dataController.days[(indexPath?.row)!].streetAddress!
+                    locationLabel.text = self.dataController.days[(indexPath?.row)!].city! + ", " + self.dataController.days[(indexPath?.row)!].state!
                 }
             }
         }
@@ -168,7 +167,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     //MARK: Table View Methods
     func tableView(_ tableView: UITableView,
                    numberOfRowsInSection section: Int) -> Int {
-        print (self.dataController.currentDay.relationshipDayNote?.count ?? 0)
         return (self.dataController.currentDay.relationshipDayNote?.count ?? 0)
 
     }
@@ -181,7 +179,8 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                 let notes = self.dataController.currentDay.relationshipDayNote?.sortedArray(using: descriptors) as! [Note]!
                 let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! ExpandingTableViewCell
                 cell.noteContentLabel.text = notes?[indexPath.row].note!
-                cell.dateTitleLabel.text = notes?[indexPath.row].date!
+                let time = notes?[indexPath.row].date!.substring(from:(notes?[indexPath.row].date!.index((notes?[indexPath.row].date!.endIndex)!, offsetBy: -5))!)
+                cell.dateTitleLabel.text = time
                 return cell
             }
             else {
@@ -340,7 +339,8 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         if self.dataController.days[self.dataController.days.count - 1].longitude == nil {
             self.dataController.days[self.dataController.days.count - 1].longitude = (String(format: "%f", didUpdateLocations[0].coordinate.longitude))
             self.dataController.days[self.dataController.days.count - 1].latitude = (String(format: "%f", didUpdateLocations[0].coordinate.latitude))
-            self.dataController.days[self.dataController.days.count - 1].weather = getWeather(lat: String(format: "%f", didUpdateLocations[0].coordinate.latitude), lon: String(format: "%f", didUpdateLocations[0].coordinate.longitude))[0]
+            self.dataController.days[self.dataController.days.count - 1].weather = String(getWeather(lat: String(format: "%f", didUpdateLocations[0].coordinate.latitude), lon: String(format: "%f", didUpdateLocations[0].coordinate.longitude))[0])
+            print (self.dataController.days[self.dataController.days.count - 1].weather)
             geocodeLocation(location: didUpdateLocations[0])
             do {
                 try self.dataController.managedObjectContext.save()
@@ -391,7 +391,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                     print (parsed)
                     let newDict = parsed as? NSDictionary
                     print((newDict!["currently"]! as? NSDictionary)?["summary"])
-                    return ["\(((newDict!["currently"]! as? NSDictionary)?["temperature"]!))°",(newDict!["currently"]! as? NSDictionary)?["icon"]! as! String]
+                    return ["\(((newDict!["currently"]! as? NSDictionary)!["temperature"]!))",(newDict!["currently"]! as? NSDictionary)?["icon"]! as! String]
                 }
                 catch let error {
                     print("A JSON parsithng error occurred, here are the details:\n \(error)")
@@ -448,6 +448,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationController?.navigationBar.titleTextAttributes = [ NSFontAttributeName: UIFont.systemFont(ofSize: 26.0)]
         initializeBarButtonItem()
         self.dataController.fetchDays()
         collectionView.reloadData()

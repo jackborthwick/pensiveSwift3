@@ -119,6 +119,7 @@ class NotificationViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         notificationCountLabel.text = String(Int(notificationStepper.value))
+        self.title = "Notifications Settings"
         self.formatter.dateFormat = "HH:mm"
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: "dismissKeyboard")
         view.addGestureRecognizer(tap)

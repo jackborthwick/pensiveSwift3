@@ -28,12 +28,12 @@ class NoteViewController: UIViewController, UITextViewDelegate {
 //        vc.dataController.appDelegate.makeNewNote = false
         textView.text = selectedNote.note
         textView.delegate = self
-        textView.becomeFirstResponder()
     }
     
     override func viewWillAppear(_ animated: Bool) {
             print("appearing")
         self.title = selectedNote.date
+        textView.becomeFirstResponder()
     }
     
 
